@@ -40,4 +40,4 @@ javafx {
     version = "15.0.1"
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
-mainClassName='code.Main'
+mainClassName='code.game.Main'
