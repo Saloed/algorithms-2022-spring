@@ -149,7 +149,7 @@ public class SATsolver {
 
 
     private Set<Integer> findPureLiterals(List<Clause> clauses) {
-        Set<Integer> pureLiterals = new HashSet<>();
+        Set<Integer> pureLiterals;
         Set<Integer> allLiterals = clauses.stream().flatMap(clause -> clause.unassignedLiterals.stream())
                 .collect(Collectors.toSet());
         pureLiterals = allLiterals.stream().filter(l -> !allLiterals.contains(-l)).collect(Collectors.toSet());
