@@ -32,11 +32,11 @@ public class Move {
         Move move = (Move) o;
         return row == move.row && col == move.col && Objects.equals(checkerToRemove, move.checkerToRemove);
     }
-//
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(row, col, checkerToRemove);
-//    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(row, col, checkerToRemove);
+    }
 
     @Override
     public String toString() {
