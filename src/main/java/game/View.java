@@ -15,6 +15,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class View extends Application {
@@ -22,11 +24,11 @@ public class View extends Application {
 
     public static final double MAIN_BOARD_SIZE = 750.0;
 
-    public static final ImagePattern FLAG = new ImagePattern(new Image("flag.png"));
+    public static final ImagePattern FLAG = new ImagePattern(new Image("flag_small.png"));
 
-    public static final ImagePattern FLAG_SELECTED = new ImagePattern(new Image("flag_selected.png"));
+    public static final ImagePattern FLAG_SELECTED = new ImagePattern(new Image("flag_selected_small.png"));
 
-    public static final ImagePattern FLAG_NOT_SELECTED = new ImagePattern(new Image("flag_not_selected.png"));
+    public static final ImagePattern FLAG_NOT_SELECTED = new ImagePattern(new Image("flag_not_selected_small.png"));
 
     private static final Image imageIcon = new Image("minesweeper_icon.jpg");
 
@@ -165,9 +167,8 @@ public class View extends Application {
             if (Pattern.matches(regex, sizeOfField.getText()) && Pattern.matches(regex, bombsCount.getText())) {
                 boardSize = Integer.parseInt(sizeOfField.getText());
                 numOfBombs = Integer.parseInt(bombsCount.getText());
-                if ((boardSize * boardSize <= numOfBombs) || (boardSize > 25) || (boardSize < 2) || (numOfBombs < 1)) {
+                if ((boardSize * boardSize <= numOfBombs) || (boardSize < 2) || (numOfBombs < 1)) {
                     // если ввели бомб больше, чем поле,
-                    // или бомб на все поле, или доска больше 25х25 (для улучшения быстроты отрисовки и отклика),
                     // или доска меньше 2x2, или бомб меньше одной,
                     // то стандартные условия
                     boardSize = DEFAULT_BOARD_SIZE;
@@ -201,18 +202,26 @@ public class View extends Application {
         int y;
 
         private static Image getImageNumber(int num) {
-            return new Image("image" + num + ".jpg");
+            return new Image("image" + num + "_small.png");
         }
 
-        public static final ImagePattern CLOSED_IMAGE = new ImagePattern(new Image("high quality/closed.jpg"));
+        public static final Map<Integer, Image> neighbourMinesImages = new HashMap<>();
 
-        public static final Image IMAGE_BOMB = new Image("high quality/bomb.png");
+        static {
+            for (int i = 0; i < 9; i++) {
+                neighbourMinesImages.put(i, getImageNumber(i));
+            }
+        }
 
-        public static final Image IMAGE_BOOM = new Image("high quality/bomb_boom.png");
+        public static final ImagePattern CLOSED_IMAGE = new ImagePattern(new Image("closed_small.jpg"));
+
+        public static final Image IMAGE_BOMB = new Image("bomb_small.png");
+
+        public static final Image IMAGE_BOOM = new Image("bomb_boom_small.png");
 
 
         public void open(int numOfNeighbours) {
-            setFill(new ImagePattern(getImageNumber(numOfNeighbours)));
+            setFill(new ImagePattern(neighbourMinesImages.get(numOfNeighbours)));
         }
 
         public void openAsBomb() {
