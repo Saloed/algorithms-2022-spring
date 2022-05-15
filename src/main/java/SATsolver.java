@@ -115,8 +115,9 @@ public class SATsolver {
         int literal = 0;
         int c = 0;
         for (Integer el : un){
-            if (watch.get(abs(el)).stream().filter(cl -> !cl.clauseSatisfied).count() > c ) {
-                c = watch.get(abs(el)).size();
+            int count = (int) watch.get(abs(el)).stream().filter(cl -> !cl.clauseSatisfied).count();
+            if (count > c) {
+                c = count;
                 literal = abs(el);
             }
         }
