@@ -1,5 +1,3 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,17 +12,8 @@ public class SATsolver {
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
-        public boolean haveSolution() {
-            return !this.solution.isEmpty();
-        }
-
         public int[] getModel() {
             return this.solution.stream().mapToInt(Integer::intValue).toArray();
-        }
-
-        @Override
-        public String toString() {
-            return this.solution.stream().map(String::valueOf).collect(Collectors.joining(" ")) + " 0";
         }
     }
 
@@ -37,37 +26,24 @@ public class SATsolver {
 
     public int[] solve() throws Exception {
 
-        final List<Clause> clauses = new ArrayList<>();
-        HashMap<Integer, Integer> watch = new HashMap<>();
-        BufferedReader br = new BufferedReader(new FileReader(this.inputName));
-        String line = br.readLine();
-        while (line != null) {
-            if (line.endsWith(" 0")) {
-                Clause clause = new Clause(line, watch);
-                clauses.add(clause);
-            }
-            line = br.readLine();
-        }
+        ParseFile file = new ParseFile(inputName);
+
+        List<Clause> clauses = file.getClauses();
+        Map<Integer, List<Clause>> watch = file.getWatch();
 
         Set<Integer> pureLiterals = findPureLiterals(clauses);
         if (pureLiterals.size() > 0) {
-            pureLiteralsProcess(clauses, pureLiterals, watch);
+            pureLiteralsProcess(pureLiterals, watch);
         }
 
         Set<Integer> literals = new HashSet<>(pureLiterals);
 
         Solution solution = new Solution(DPLL(clauses, literals, watch));
 
-        if (solution.haveSolution()) {
-            System.out.println("SAT");
-            System.out.println(solution);
-        } else {
-            System.out.println("UNSAT");
-        }
         return solution.getModel();
     }
 
-    private Set<Integer> DPLL(List<Clause> clauses, Set<Integer> literals, HashMap<Integer, Integer> watch) {
+    private Set<Integer> DPLL(List<Clause> clauses, Set<Integer> literals, Map<Integer, List<Clause>> watch) {
 
         if (clauses.stream().allMatch(clause -> clause.clauseSatisfied)) {
             return literals;
@@ -82,13 +58,13 @@ public class SATsolver {
 
                 if (unitPropagation.contains(-unit) || clauses.stream().anyMatch(clause -> clause.emptyClause)) {
                     for (Integer literal : newLiterals) {
-                        undoStep(clauses, literal, watch);
+                        undoStep(literal, watch);
                     }
 
                     return new HashSet<>();
                 }
                 newLiterals.add(unit);
-                applyStep(clauses, unit, watch);
+                applyStep(unit, watch);
             }
             unitPropagation.removeAll(newLiterals);
 
@@ -105,22 +81,22 @@ public class SATsolver {
             return new HashSet<>();
         }
 
-        applyStep(clauses, deepLit, watch);
-        literals.addAll(newLiterals);
+        applyStep(deepLit, watch);
+
         literals.add(deepLit);
         Set<Integer> s = DPLL(clauses, literals, watch);
         if (s.isEmpty()) {
             literals.remove(deepLit);
-            undoStep(clauses, deepLit, watch);
+            undoStep(deepLit, watch);
         } else {
             return  s;
         }
-        applyStep(clauses, -deepLit, watch);
+        applyStep(-deepLit, watch);
         literals.add(-deepLit);
         Set<Integer> s2 = DPLL(clauses, literals, watch);
         if (s2.isEmpty()) {
             literals.remove(-deepLit);
-            undoStep(clauses, -deepLit, watch);
+            undoStep(-deepLit, watch);
         } else {
             return  s2;
         }
@@ -128,25 +104,24 @@ public class SATsolver {
 
         literals.removeAll(newLiterals);
         for(Integer literal : newLiterals) {
-            undoStep(clauses, literal, watch);
+            undoStep(literal, watch);
         }
         return new HashSet<>();
     }
 
-    private int chooseLiteral(List<Clause> clauses, HashMap<Integer, Integer> watch) {
+    private int chooseLiteral(List<Clause> clauses, Map<Integer, List<Clause>> watch) {
         Set<Integer> un = clauses.stream().filter(clause -> !clause.clauseSatisfied).
                 flatMap(clause -> clause.unassignedLiterals.stream()).collect(Collectors.toSet());
         int literal = 0;
         int c = 0;
         for (Integer el : un){
-            if (watch.get(abs(el)) > c ) {
-                c = watch.get(abs(el));
+            if (watch.get(abs(el)).stream().filter(cl -> !cl.clauseSatisfied).count() > c ) {
+                c = watch.get(abs(el)).size();
                 literal = abs(el);
             }
         }
         return literal;
     }
-
 
     private Set<Integer> findPureLiterals(List<Clause> clauses) {
         Set<Integer> pureLiterals;
@@ -156,52 +131,40 @@ public class SATsolver {
         return pureLiterals;
     }
 
-    private void pureLiteralsProcess(List<Clause> clauses, Set<Integer> pureLiterals, HashMap<Integer, Integer> watch) {
+    private void pureLiteralsProcess(Set<Integer> pureLiterals, Map<Integer, List<Clause>> watch) {
         for (Integer literal : pureLiterals) {
-            for (Clause clause : clauses) {
-                if (!clause.clauseSatisfied && clause.unassignedLiterals.contains(literal)) {
-                    for (Integer num : clause.unassignedLiterals){
-                        watch.put(abs(num), watch.get(abs(num)) - 1);
-                    }
-                    clause.assignedLiterals.add(literal);
-                    clause.unassignedLiterals.remove(literal);
-                    clause.clauseSatisfied = true;
-                }
+            for (Clause clause : watch.get(abs(literal))) {
+                clause.assignedLiterals.add(literal);
+                clause.unassignedLiterals.remove(literal);
+                clause.clauseSatisfied = true;
             }
         }
     }
 
 
-    private void applyStep(final List<Clause> clauses, final Integer literal, HashMap<Integer, Integer> watch) {
-        for(Clause clause : clauses) {
+    private void applyStep(final Integer literal, Map<Integer, List<Clause>> watch) {
+        for(Clause clause : watch.get(abs(literal))) {
             if(!clause.clauseSatisfied) {
                 if(clause.unassignedLiterals.contains(literal)) {
                     clause.clauseSatisfied = true;
                     clause.assignedLiterals.add(literal);
-                    for (Integer num : clause.unassignedLiterals){
-                        watch.put(abs(num), watch.get(abs(num)) - 1);
-                    }
                     clause.unassignedLiterals.remove(literal);
-                } else if(clause.unassignedLiterals.contains(-literal)) {
+                } else {
                     if (clause.unassignedLiterals.size() == 1) clause.emptyClause = true;
                     clause.unassignedLiterals.remove((Integer) (-literal));
                     clause.deadLiterals.add(-literal);
-                    watch.put(abs(-literal), watch.get(abs(-literal)) - 1);
                 }
             }
         }
     }
 
 
-    private void undoStep(final List<Clause> clauses, final Integer literal, HashMap<Integer, Integer> watch) {
-        for (Clause clause : clauses) {
+    private void undoStep(final Integer literal, Map<Integer, List<Clause>> watch) {
+        for (Clause clause : watch.get(abs(literal))) {
             if (clause.clauseSatisfied && clause.assignedLiterals.contains(literal) && clause.assignedLiterals.size() == 1) {
                 clause.clauseSatisfied = false;
                 clause.assignedLiterals.remove(literal);
                 clause.unassignedLiterals.add(literal);
-                for (Integer num : clause.unassignedLiterals){
-                    watch.put(abs(num), watch.get(abs(num)) + 1);
-                }
             } else  if ((clause.clauseSatisfied && clause.assignedLiterals.contains(literal))) {
                 clause.assignedLiterals.remove(literal);
                 clause.unassignedLiterals.add(literal);
@@ -210,12 +173,11 @@ public class SATsolver {
                 if (clause.unassignedLiterals.size() == 0) clause.emptyClause = false;
                 clause.deadLiterals.remove((Integer) (-literal));
                 clause.unassignedLiterals.add(-literal);
-                watch.put(abs(-literal), watch.get(abs(-literal)) + 1);
             }
         }
     }
 
-    private Set<Integer> findUnitClauses(final List<Clause> clauses) {
+    private Set<Integer> findUnitClauses(List<Clause> clauses) {
         Set<Integer> unitPropagation = new HashSet<>();
         for(Clause clause : clauses) {
             if(clause.isUnitClause()) {
@@ -231,14 +193,13 @@ public class SATsolver {
         private List<Integer> deadLiterals = new ArrayList<>();
         private boolean clauseSatisfied = false;
         private boolean emptyClause = false;
-        private Clause(String inputLine, HashMap<Integer, Integer> watch) {
-            String[] line = inputLine.substring(0, inputLine.length() - 2).split("\\s+");
-            for (String literal : line) {
-                int num = Integer.parseInt(literal);
-                unassignedLiterals.add(num);
-                if (!watch.containsKey(abs(num))) watch.put(abs(num), 1);
-                else watch.put(abs(num), watch.get(abs(num)) + 1);
+        public Clause(List<Integer> literals, Map<Integer, List<Clause>> watch) {
+            for (Integer literal : literals) {
+                unassignedLiterals.add(literal);
+                if (!watch.containsKey(abs(literal))) watch.put(abs(literal), new ArrayList<>());
+                watch.get(abs(literal)).add(this);
             }
+
         }
         boolean isUnitClause() {
             return !clauseSatisfied && unassignedLiterals.size() == 1;
