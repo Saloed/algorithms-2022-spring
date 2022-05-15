@@ -1,7 +1,6 @@
 package code.game;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 public class Checker {
@@ -63,10 +62,10 @@ public class Checker {
         return color == checker.color && isKing == checker.isKing && col == checker.col && row == checker.row;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(parentGame, color, isKing, col, row);
-    }
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(parentGame, color, isKing, col, row);
+//    }
 
     public void move(Move move) {
         parentGame.getGameBoard()[move.getRow()][move.getCol()] = this;

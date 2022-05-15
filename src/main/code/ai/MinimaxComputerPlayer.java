@@ -89,7 +89,7 @@ public class MinimaxComputerPlayer extends ComputerPlayer {
                 bestNextMove = minimax(depth - 1, alpha, beta, currentSide.getOpposite(), gameWithMove);
                 currentScore = bestNextMove;
                 maxScore = Math.max(maxScore, currentScore);
-                alpha = Math.max(alpha, currentScore);    // depth 8 shows profits of pruning
+                alpha = Math.max(alpha, currentScore);
                 if (beta <= alpha) break;
             }
             return maxScore;

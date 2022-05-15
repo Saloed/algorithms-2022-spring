@@ -37,6 +37,7 @@ public class Board {
     private Game.Side secondPlayerSide;
     //    private ComputerEnemy firstComputerPlayer; // to comment: for ai vs ai
 
+    @SuppressWarnings({"unused", "UnusedAssignment"})
     public Board(Game game, Player secondPlayer) {
         this.game = game;
         this.secondPlayer = secondPlayer;
@@ -45,7 +46,6 @@ public class Board {
             int num = rnd.nextBoolean() ? 1 : 0;
             secondPlayerSide = Game.Side.values()[num];
         }
-        //TODO: get rid of the warnings
         ComputerEnemy computerPlayer;
         switch (secondPlayer) {
             case AIHARD -> computerPlayer = new ComputerEnemy(new MinimaxComputerPlayer(game, secondPlayerSide, true), secondPlayerSide); // hard vs medium 85% WR
