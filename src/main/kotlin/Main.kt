@@ -5,11 +5,11 @@ fun main(args: Array<String>) {
     val array4: Array<IntArray> = arrayOf(intArrayOf(1, 2, 3, 4), intArrayOf(5, 6, 7, 8), intArrayOf(9, 10, 11, 12), intArrayOf(13, 15, 14, 0))
 
     val board = Board(array3)
-    println(board)
-    println(board.metric())
+    println("Initial board:\n$board")
+    println("board.metric(): ${ board.metric() }")
 
     val solver = Solver(board)
-    println(solver.isSolvable())
-    println(solver.countMoves())
+    println("solver.isSolvable(): ${ solver.isSolvable() }")
+    println("solver.countMoves(): ${ solver.countMoves() }")
     println(solver.solution())
 }

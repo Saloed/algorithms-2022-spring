@@ -15,6 +15,7 @@ class Board(private val numbers: Array<IntArray>) {
     fun numbers() = numbers
     fun metric() = metric
     fun zeroCoordinates() = zeroCoordinates
+
     private fun numbersSize() = numbers.size
 
     fun isNeedPosition() = metric == 0
@@ -29,49 +30,62 @@ class Board(private val numbers: Array<IntArray>) {
 
     private fun turn(thisNumbers: Array<IntArray> = numbers, x1: Int, y1: Int, x2: Int, y2: Int): Board? {
         if (x2 < 0 || x2 > numbersSize() - 1 || y2 < 0 || y2 > numbersSize() - 1) return null
-        val temp = thisNumbers[x1][y1]
-        thisNumbers[x1][y1] = thisNumbers[x2][y2]
-        thisNumbers[x2][y2] = temp
+        val temp = thisNumbers[x2][y2]
+        thisNumbers[x2][y2] = thisNumbers[x1][y1]
+        thisNumbers[x1][y1] = temp
         return Board(thisNumbers)
     }
 
-    fun neighbors(): MutableList<Board> {
-        val neigh = mutableListOf<Board>()
-        val thisNumbers = numbers
+    fun neighbors(): Iterable<Board> {
+        val neigh = hashSetOf<Board>()
+//        val thisNumbers = numbers.copyOf()
         turn(
-            thisNumbers,
+            getNewNumbers(),
             zeroCoordinates.first, zeroCoordinates.second,
             zeroCoordinates.first, zeroCoordinates.second + 1
         )?.let { neigh.add(it) }
         turn(
-            thisNumbers,
+            getNewNumbers(),
             zeroCoordinates.first, zeroCoordinates.second,
             zeroCoordinates.first, zeroCoordinates.second - 1
         )?.let { neigh.add(it) }
         turn(
-            thisNumbers,
+            getNewNumbers(),
             zeroCoordinates.first, zeroCoordinates.second,
             zeroCoordinates.first + 1, zeroCoordinates.second
         )?.let { neigh.add(it) }
         turn(
-            thisNumbers,
+            getNewNumbers(),
             zeroCoordinates.first, zeroCoordinates.second,
             zeroCoordinates.first - 1, zeroCoordinates.second
         )?.let { neigh.add(it) }
         return neigh
     }
 
-//    override fun equals(other: Any?): Boolean {
-//        if (other == this) return true
-//        if (other == null || other !is Board) return false
-//        if (other.numbersSize() != numbersSize()) return false
-//
-//        for (i in numbers.indices) for (j in numbers[i].indices)
-//            if (numbers[i][j] != other.numbers[i][j]) return false
-//
-//        return true
-//    }
-//
+    private fun getNewNumbers(): Array<IntArray> = deepCopy(numbers)
+
+    private fun deepCopy(original: Array<IntArray>): Array<IntArray> {
+        val result = Array(original.size) { intArrayOf() }
+        for (i in original.indices) {
+            result[i] = IntArray(original[i].size)
+            for (j in original[i].indices) result[i][j] = original[i][j]
+        }
+        return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == this) return true
+        if (other == null || other !is Board) return false
+
+        val board: Board = other
+        if (board.numbersSize() != numbersSize()) return false
+
+        for (i in numbers.indices) for (j in numbers[i].indices)
+            if (numbers[i][j] != board.numbers[i][j]) return false
+
+        return true
+    }
+
     override fun toString(): String {
         var res = ""
         for (i in numbers.indices) {
@@ -82,11 +96,11 @@ class Board(private val numbers: Array<IntArray>) {
         }
         return res
     }
-//
-//    override fun hashCode(): Int {
-//        var result = numbers.contentDeepHashCode()
-//        result = 31 * result + metric
-//        result = 31 * result + zeroCoordinates.hashCode()
-//        return result
-//    }
+
+    override fun hashCode(): Int {
+        var result = numbers.contentDeepHashCode()
+        result = 31 * result + metric
+        result = 31 * result + zeroCoordinates.hashCode()
+        return result
+    }
 }

@@ -1,7 +1,6 @@
 import java.util.PriorityQueue
 
-class Solver(board: Board) {
-    private val initial: Board = board
+class Solver(private val initial: Board) {
     private val winTrace: MutableList<Board> = mutableListOf()
 
     private class Node(
@@ -11,9 +10,10 @@ class Solver(board: Board) {
 
     init {
         if (isSolvable()) {
-            val priorityQueue = PriorityQueue(
-                Comparator<Node> { node1, node2 -> (metric(node1) - metric(node2)).compareTo(0) }
-            )
+            val priorityQueue = PriorityQueue<Node>(10) { node1, node2 ->
+                metric(node1).compareTo(metric(node2))
+            }
+
             priorityQueue.add(Node(null, initial))
 
             while (true) {
@@ -21,12 +21,15 @@ class Solver(board: Board) {
 //                println(thisNode.board)
 
                 if (thisNode.board.isNeedPosition()) {
-                    saveResults(thisNode)
+                    saveResults(Node(thisNode, thisNode.board))
                     break
                 }
 
-                for (thisBoard in thisNode.board.neighbors())
+                val iterator: Iterator<Board> = thisNode.board.neighbors().iterator()
+                while (iterator.hasNext()) {
+                    val thisBoard: Board = iterator.next()
                     if (!containsInPath(thisNode, thisBoard)) priorityQueue.add(Node(thisNode, thisBoard))
+                }
             }
         }
     }
@@ -34,8 +37,8 @@ class Solver(board: Board) {
     private fun containsInPath(node: Node, board: Board): Boolean {
         var nowNode: Node? = node
         while (true) {
-            if (node.board == board) return true
-            nowNode = nowNode?.prevNode ?: return false
+            if ((nowNode?.board ?: return false) == board) return true
+            nowNode = nowNode.prevNode
         }
     }
 
@@ -60,7 +63,7 @@ class Solver(board: Board) {
             isContinue = true
         }
         for (i in array.indices)
-            for (j in array[i].indices){
+            for (j in array[i].indices) {
                 if (i == 0 && j == 0) continue
                 if (isContinue) {
                     isContinue = false
@@ -86,11 +89,11 @@ class Solver(board: Board) {
     private fun saveResults(node: Node) {
         var nowNode: Node? = node
         while (true) {
-            winTrace.add(nowNode?.board ?: return winTrace.reverse())
-            nowNode = nowNode.prevNode
+            nowNode = nowNode?.prevNode ?: return winTrace.reverse()
+            winTrace.add(nowNode.board)
         }
     }
 
     fun countMoves(): Int = winTrace.size - 1
-    fun solution(): List<Board> = winTrace
+    fun solution(): Iterable<Board> = winTrace
 }
