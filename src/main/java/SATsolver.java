@@ -152,7 +152,7 @@ public class SATsolver {
                     clause.unassignedLiterals.remove(literal);
                 } else {
                     if (clause.unassignedLiterals.size() == 1) clause.emptyClause = true;
-                    clause.unassignedLiterals.remove((Integer) (-literal));
+                    clause.unassignedLiterals.remove(-literal);
                     clause.deadLiterals.add(-literal);
                 }
             }
@@ -172,7 +172,7 @@ public class SATsolver {
             }
             if (clause.deadLiterals.contains(-literal)) {
                 if (clause.unassignedLiterals.size() == 0) clause.emptyClause = false;
-                clause.deadLiterals.remove((Integer) (-literal));
+                clause.deadLiterals.remove(-literal);
                 clause.unassignedLiterals.add(-literal);
             }
         }
