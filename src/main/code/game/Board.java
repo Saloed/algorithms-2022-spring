@@ -32,15 +32,16 @@ public class Board {
     private final Set<Circle> highlightedSquares = new HashSet<>();
     private DisplayChecker selectedChecker = null;
     // players settings
-//    private final Player firstPlayer = Player.AIEASY; // to comment: for ai vs ai
+    private final Player firstPlayer; // to comment: for ai vs ai
     private final Player secondPlayer;
     private Game.Side secondPlayerSide;
-    //    private ComputerEnemy firstComputerPlayer; // to comment: for ai vs ai
+    private ComputerEnemy firstComputerPlayer; // to comment: for ai vs ai
 
     @SuppressWarnings({"unused", "UnusedAssignment"})
-    public Board(Game game, Player secondPlayer) {
+    public Board(Game game, Player firstPlayer, Player secondPlayer) {
         this.game = game;
         this.secondPlayer = secondPlayer;
+        this.firstPlayer = firstPlayer;
         if (secondPlayer != Player.HUMAN) {
             Random rnd = new Random();
             int num = rnd.nextBoolean() ? 1 : 0;
@@ -53,7 +54,8 @@ public class Board {
             case AIEASY -> computerPlayer = new ComputerEnemy(new RandomComputerPlayer(game, secondPlayerSide), secondPlayerSide);
         }
         // ai vs ai
-//        firstComputerPlayer = new ComputerEnemy(new RandomComputerPlayer(game, secondPlayerSide.getOpposite()), secondPlayerSide.getOpposite()); // to comment: for ai vs ai
+        if (firstPlayer != Player.HUMAN)
+            firstComputerPlayer = new ComputerEnemy(new RandomComputerPlayer(game, secondPlayerSide.getOpposite()), secondPlayerSide.getOpposite()); // to comment: for ai vs ai
 //        System.out.println("Random is " + secondPlayerSide.getOpposite());
         // ai vs ai
         gameField = new DisplayChecker[8][8];
@@ -62,11 +64,11 @@ public class Board {
             for (int col = 0; col < 8; col++) {
                 Rectangle rect = new Rectangle(row * TILE_SIZE, col * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 rect.setFill(Color.LIGHTYELLOW);
-//                if (firstPlayer == Player.HUMAN) { // to comment: for ai vs ai
-                rect.setOnMouseClicked(event -> {
-                    if (selectedChecker != null) resetSelected();
-                });
-//                } // to comment: for ai vs ai
+                if (firstPlayer == Player.HUMAN) { // to comment: for ai vs ai
+                    rect.setOnMouseClicked(event -> {
+                        if (selectedChecker != null) resetSelected();
+                    });
+                } // to comment: for ai vs ai
                 if ((row % 2 == 0 && col % 2 != 0) || (row % 2 != 0 && col % 2 == 0)) rect.setFill(Color.BROWN);
                 root.getChildren().add(rect);
             }
@@ -112,23 +114,23 @@ public class Board {
             circle.setFill(color);
             circle.setStrokeWidth(2);
             circle.setStroke(Color.BLACK);
-//            if (firstPlayer == Player.HUMAN) { // to comment: for ai vs ai
-            if (secondPlayer != Player.HUMAN) {
-                if (parentChecker.getColor() == secondPlayerSide.getOpposite()) {
+            if (firstPlayer == Player.HUMAN) { // to comment: for ai vs ai
+                if (secondPlayer != Player.HUMAN) {
+                    if (parentChecker.getColor() == secondPlayerSide.getOpposite()) {
+                        circle.setOnMouseClicked(event -> {
+                            if (selectedChecker != null) resetSelected();
+                            if (game.getTurn() == parentChecker.getColor())
+                                select();
+                        });
+                    }
+                } else {
                     circle.setOnMouseClicked(event -> {
                         if (selectedChecker != null) resetSelected();
                         if (game.getTurn() == parentChecker.getColor())
                             select();
                     });
                 }
-            } else {
-                circle.setOnMouseClicked(event -> {
-                    if (selectedChecker != null) resetSelected();
-                    if (game.getTurn() == parentChecker.getColor())
-                        select();
-                });
-            }
-//            } // to comment: for ai vs ai
+            } // to comment: for ai vs ai
             root.getChildren().add(this.circle);
             drawChecker();
         }
@@ -163,8 +165,8 @@ public class Board {
             for (Move move : moves) {
                 Circle circleToMove = new Circle(move.getCol() * TILE_SIZE + CHECKER_CENTER, move.getRow() * TILE_SIZE + CHECKER_CENTER, LEGAL_MOVE_RADIUS);
                 circleToMove.setFill(rgb(0, 255, 0, 0.5));
-//                if (firstPlayer == Player.HUMAN) // to comment: for ai vs ai
-                circleToMove.setOnMouseClicked(event -> drawMove(move));
+                if (firstPlayer == Player.HUMAN) // to comment: for ai vs ai
+                    circleToMove.setOnMouseClicked(event -> drawMove(move));
                 highlightedSquares.add(circleToMove);
                 root.getChildren().add(circleToMove);
             }
@@ -239,7 +241,7 @@ public class Board {
                         }
                     });
                 }
-            }, 0, 1000);
+            }, 0, 3000);
         }
 
         public void makeBestMove() {
