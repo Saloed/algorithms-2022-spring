@@ -182,16 +182,16 @@ public class SATsolver {
         Set<Integer> unitPropagation = new HashSet<>();
         for(Clause clause : clauses) {
             if(clause.isUnitClause()) {
-                unitPropagation.add(clause.unassignedLiterals.get(0));
+                unitPropagation.addAll(clause.unassignedLiterals);
             }
         }
         return unitPropagation;
     }
 
     public static class Clause {
-        private List<Integer> unassignedLiterals = new ArrayList<>();
-        private List<Integer> assignedLiterals = new ArrayList<>();
-        private List<Integer> deadLiterals = new ArrayList<>();
+        private Set<Integer> unassignedLiterals = new HashSet<>();
+        private Set<Integer> assignedLiterals = new HashSet<>();
+        private Set<Integer> deadLiterals = new HashSet<>();
         private boolean clauseSatisfied = false;
         private boolean emptyClause = false;
         public Clause(List<Integer> literals, Map<Integer, List<Clause>> watch) {
