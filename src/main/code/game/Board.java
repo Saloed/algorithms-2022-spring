@@ -35,7 +35,6 @@ public class Board {
     private final Player firstPlayer; // to comment: for ai vs ai
     private final Player secondPlayer;
     private Game.Side secondPlayerSide;
-    private ComputerEnemy firstComputerPlayer; // to comment: for ai vs ai
 
     @SuppressWarnings({"unused", "UnusedAssignment"})
     public Board(Game game, Player firstPlayer, Player secondPlayer) {
@@ -47,15 +46,21 @@ public class Board {
             int num = rnd.nextBoolean() ? 1 : 0;
             secondPlayerSide = Game.Side.values()[num];
         }
-        ComputerEnemy computerPlayer;
+        ComputerEnemy secondComputerPlayer;
         switch (secondPlayer) {
-            case AIHARD -> computerPlayer = new ComputerEnemy(new MinimaxComputerPlayer(game, secondPlayerSide, true), secondPlayerSide); // hard vs medium 85% WR
-            case AIMEDIUM -> computerPlayer = new ComputerEnemy(new MinimaxComputerPlayer(game, secondPlayerSide, false), secondPlayerSide); // medium vs easy 100% WR
-            case AIEASY -> computerPlayer = new ComputerEnemy(new RandomComputerPlayer(game, secondPlayerSide), secondPlayerSide);
+            case AIHARD -> secondComputerPlayer = new ComputerEnemy(new MinimaxComputerPlayer(game, secondPlayerSide, true), secondPlayerSide); // hard vs medium 85% WR
+            case AIMEDIUM -> secondComputerPlayer = new ComputerEnemy(new MinimaxComputerPlayer(game, secondPlayerSide, false), secondPlayerSide); // medium vs easy 100% WR
+            case AIEASY -> secondComputerPlayer = new ComputerEnemy(new RandomComputerPlayer(game, secondPlayerSide), secondPlayerSide);
         }
         // ai vs ai
+        // to comment: for ai vs ai
+        ComputerEnemy firstComputerPlayer;
         if (firstPlayer != Player.HUMAN)
-            firstComputerPlayer = new ComputerEnemy(new RandomComputerPlayer(game, secondPlayerSide.getOpposite()), secondPlayerSide.getOpposite()); // to comment: for ai vs ai
+            switch (secondPlayer) {
+                case AIHARD -> firstComputerPlayer = new ComputerEnemy(new MinimaxComputerPlayer(game, secondPlayerSide.getOpposite(), true), secondPlayerSide.getOpposite()); // hard vs medium 85% WR
+                case AIMEDIUM -> firstComputerPlayer = new ComputerEnemy(new MinimaxComputerPlayer(game, secondPlayerSide.getOpposite(), false), secondPlayerSide.getOpposite()); // medium vs easy 100% WR
+                case AIEASY -> firstComputerPlayer = new ComputerEnemy(new RandomComputerPlayer(game, secondPlayerSide.getOpposite()), secondPlayerSide.getOpposite());
+            } // to comment: for ai vs ai
 //        System.out.println("Random is " + secondPlayerSide.getOpposite());
         // ai vs ai
         gameField = new DisplayChecker[8][8];
@@ -208,14 +213,6 @@ public class Board {
             } else {
                 label.setText("WINNER: WHITE");
             }
-            //for stats
-//            Main.games++;
-//            if (secondPlayerSide.getOpposite() == game.getWinner()) Main.wins++;
-//            System.out.println("Winner: " + game.getWinner());
-//            System.out.println(Main.games);
-//            System.out.println(Main.wins);
-//            Main.mediumButton.fire();
-            //for stats
             winnerScreen.getChildren().add(label);
             stage.setScene(new Scene(winnerScreen));
             stage.show();
