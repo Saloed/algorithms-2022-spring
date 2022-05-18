@@ -25,11 +25,9 @@ class Solver(private val initial: Board) {
                     break
                 }
 
-                val iterator: Iterator<Board> = thisNode.board.neighbors().iterator()
-                while (iterator.hasNext()) {
-                    val thisBoard: Board = iterator.next()
+                for (thisBoard in thisNode.board.neighbors())
                     if (!containsInPath(thisNode, thisBoard)) priorityQueue.add(Node(thisNode, thisBoard))
-                }
+
             }
         }
     }
@@ -95,5 +93,5 @@ class Solver(private val initial: Board) {
     }
 
     fun countMoves(): Int = winTrace.size - 1
-    fun solution(): Iterable<Board> = winTrace
+    fun solution(): List<Board> = winTrace
 }

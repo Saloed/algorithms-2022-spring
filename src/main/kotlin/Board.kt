@@ -36,9 +36,8 @@ class Board(private val numbers: Array<IntArray>) {
         return Board(thisNumbers)
     }
 
-    fun neighbors(): Iterable<Board> {
-        val neigh = hashSetOf<Board>()
-//        val thisNumbers = numbers.copyOf()
+    fun neighbors(): List<Board> {
+        val neigh = mutableListOf<Board>()
         turn(
             getNewNumbers(),
             zeroCoordinates.first, zeroCoordinates.second,
@@ -74,7 +73,7 @@ class Board(private val numbers: Array<IntArray>) {
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other == this) return true
+        if (other === this) return true
         if (other == null || other !is Board) return false
 
         val board: Board = other
@@ -90,9 +89,11 @@ class Board(private val numbers: Array<IntArray>) {
         var res = ""
         for (i in numbers.indices) {
             for (j in numbers[i].indices) {
-                res += "${ numbers[i][j] } "
+                if (numbers[i][j] / 10 == 0) res += " "
+                res += "${ numbers[i][j] }"
+                if (j != numbers[i].lastIndex) res += " "
             }
-            res += "\n"
+            if (i != numbers.lastIndex) res += "\n"
         }
         return res
     }
