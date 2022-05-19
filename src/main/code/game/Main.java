@@ -24,81 +24,42 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        //selecting a game mode
-        Stage selectionWindow = new Stage();
-        selectionWindow.setTitle("Select Player 1");
-        Button humanButton = new Button("Player");
-        Button hardButton = new Button("Computer (Hard)");
-        Button mediumButton = new Button("Computer (Medium)");
-        Button easyButton = new Button("Computer (Easy)");
-        humanButton.setOnAction(event -> {
-            anotherWindow(primaryStage, Board.Player.HUMAN);
-            selectionWindow.close();
-        });
-        hardButton.setOnAction(event -> {
-            anotherWindow(primaryStage, Board.Player.AIHARD);
-            selectionWindow.close();
-        });
-        mediumButton.setOnAction(event -> {
-            anotherWindow(primaryStage, Board.Player.AIMEDIUM);
-            selectionWindow.close();
-        });
-        easyButton.setOnAction(event -> {
-            anotherWindow(primaryStage, Board.Player.AIEASY);
-            selectionWindow.close();
-        });
-        setWindow(selectionWindow, humanButton, hardButton, mediumButton, easyButton);
+        setWindow(true, null);
     }
 
-    private void anotherWindow(Stage primaryStage, Board.Player player1) {
-        Stage selectionWindow = new Stage();
-        selectionWindow.setTitle("Select Player 2");
+    private void setWindow(boolean firstTime, Board.Player player1) {
+        Stage stage = new Stage();
+        if (firstTime) stage.setTitle("Select Player 1");
+        else stage.setTitle("Select Player 2");
         Button humanButton = new Button("Player");
         Button hardButton = new Button("Computer (Hard)");
         Button mediumButton = new Button("Computer (Medium)");
         Button easyButton = new Button("Computer (Easy)");
-        if (player1 == Board.Player.HUMAN)
+        if (firstTime)
             humanButton.setOnAction(event -> {
-                startGame(primaryStage, player1, Board.Player.HUMAN);
-                selectionWindow.close();
+                setWindow(false, Board.Player.HUMAN);
+                stage.close();
+            });
+        else if (player1 == Board.Player.HUMAN)
+            humanButton.setOnAction(event -> {
+                startGame(player1, Board.Player.HUMAN);
+                stage.close();
             });
         hardButton.setOnAction(event -> {
-            startGame(primaryStage, player1, Board.Player.AIHARD);
-            selectionWindow.close();
+            if (firstTime) setWindow(false, Board.Player.AIHARD);
+            else startGame(player1, Board.Player.AIHARD);
+            stage.close();
         });
         mediumButton.setOnAction(event -> {
-            startGame(primaryStage, player1, Board.Player.AIMEDIUM);
-            selectionWindow.close();
+            if (firstTime) setWindow(false, Board.Player.AIMEDIUM);
+            else startGame(player1, Board.Player.AIMEDIUM);
+            stage.close();
         });
         easyButton.setOnAction(event -> {
-            startGame(primaryStage, player1, Board.Player.AIEASY);
-            selectionWindow.close();
+            if (firstTime) setWindow(false, Board.Player.AIEASY);
+            else startGame(player1, Board.Player.AIEASY);
+            stage.close();
         });
-        setWindow(selectionWindow, humanButton, hardButton, mediumButton, easyButton);
-    }
-
-    private void startGame(Stage primaryStage, Board.Player player1, Board.Player player2) {
-        Game game = new Game();
-        Board board = new Board(game, player1, player2);
-        primaryStage.setTitle("Checkers");
-        InputStream iconStream = getClass().getResourceAsStream("/checkers-icon.png");
-        Image icon = null;
-        if (iconStream != null) {
-            icon = new Image(iconStream);
-        }
-        primaryStage.getIcons().add(icon);
-        primaryStage.setOnCloseRequest(event -> {
-            try {
-                System.exit(0);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        primaryStage.setScene(new Scene(board.getRoot()));
-        primaryStage.show();
-    }
-
-    private void setWindow(Stage stage, Button humanButton, Button hardButton, Button mediumButton, Button easyButton) {
         Pane pane = new Pane();
         pane.setPrefSize(280, 250);
         InputStream iconStream = getClass().getResourceAsStream("/checkers-icon.png");
@@ -128,6 +89,28 @@ public class Main extends Application {
         });
         pane.getChildren().addAll(humanButton, hardButton, mediumButton, easyButton);
         stage.setScene(new Scene(pane));
+        stage.show();
+    }
+
+    private void startGame(Board.Player player1, Board.Player player2) {
+        Stage stage = new Stage();
+        Game game = new Game();
+        Board board = new Board(game, player1, player2);
+        stage.setTitle("Checkers");
+        InputStream iconStream = getClass().getResourceAsStream("/checkers-icon.png");
+        Image icon = null;
+        if (iconStream != null) {
+            icon = new Image(iconStream);
+        }
+        stage.getIcons().add(icon);
+        stage.setOnCloseRequest(event -> {
+            try {
+                System.exit(0);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        stage.setScene(new Scene(board.getRoot()));
         stage.show();
     }
 

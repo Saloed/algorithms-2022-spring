@@ -56,7 +56,7 @@ public class Board {
         // to comment: for ai vs ai
         ComputerEnemy firstComputerPlayer;
         if (firstPlayer != Player.HUMAN)
-            switch (secondPlayer) {
+            switch (firstPlayer) {
                 case AIHARD -> firstComputerPlayer = new ComputerEnemy(new MinimaxComputerPlayer(game, secondPlayerSide.getOpposite(), true), secondPlayerSide.getOpposite()); // hard vs medium 85% WR
                 case AIMEDIUM -> firstComputerPlayer = new ComputerEnemy(new MinimaxComputerPlayer(game, secondPlayerSide.getOpposite(), false), secondPlayerSide.getOpposite()); // medium vs easy 100% WR
                 case AIEASY -> firstComputerPlayer = new ComputerEnemy(new RandomComputerPlayer(game, secondPlayerSide.getOpposite()), secondPlayerSide.getOpposite());
@@ -238,7 +238,7 @@ public class Board {
                         }
                     });
                 }
-            }, 0, 3000);
+            }, 0, 1000);
         }
 
         public void makeBestMove() {
