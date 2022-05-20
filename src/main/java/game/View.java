@@ -32,22 +32,22 @@ public class View extends Application {
 
     private static final Image imageIcon = new Image("minesweeper_icon.jpg");
 
-    public static final int DEFAULT_BOARD_SIZE = 10;
+    //public static final int DEFAULT_BOARD_SIZE = 10;
 
     private boolean setFlag = false;
 
-    public static final int DEFAULT_NUM_OF_BOMBS = 15;
+    //public static final int DEFAULT_NUM_OF_BOMBS = 15;
 
-    String regex = "\\d+";
+    //String regex = "\\d+";
 
     private final Stage appStage = new Stage();
     private final Stage messageStage = new Stage();
     
-    public static int boardSize = DEFAULT_BOARD_SIZE;
+    public static int boardSize = 10;
 
     public static double tileSize;
 
-    private int numOfBombs = DEFAULT_NUM_OF_BOMBS;
+    private int numOfBombs = 15;
 
     public static Group tileGroup = new Group();
 
@@ -141,7 +141,7 @@ public class View extends Application {
         text.setFont(font);
         text.setStyle("-fx-text-fill: dimgrey");
         text.relocate(120, 100);
-        TextField sizeOfField = new TextField(String.format("%d", DEFAULT_BOARD_SIZE));
+        TextField sizeOfField = new TextField(String.format("%d", 10));
         sizeOfField.relocate(250, 150);
         sizeOfField.setPrefSize(45, 25);
         sizeOfField.setFont(font);
@@ -150,7 +150,7 @@ public class View extends Application {
         labelSize.setFont(font);
         labelSize.setStyle("-fx-text-fill: dimgrey");
         labelSize.relocate(85, 150);
-        TextField bombsCount = new TextField(String.format("%d", DEFAULT_NUM_OF_BOMBS));
+        TextField bombsCount = new TextField(String.format("%d", 15));
         bombsCount.relocate(250, 200);
         bombsCount.setPrefSize(45, 25);
         bombsCount.setFont(font);
@@ -164,15 +164,12 @@ public class View extends Application {
         buttonOK.setFont(font);
         buttonOK.setStyle("-fx-text-fill: white; -fx-background-color: orange");
         buttonOK.setOnMouseClicked(event -> {
-            if (Pattern.matches(regex, sizeOfField.getText()) && Pattern.matches(regex, bombsCount.getText())) {
-                boardSize = Integer.parseInt(sizeOfField.getText());
-                numOfBombs = Integer.parseInt(bombsCount.getText());
-                if ((boardSize * boardSize <= numOfBombs) || (boardSize < 2) || (numOfBombs < 1)) {
-                    // если ввели бомб больше, чем поле,
-                    // или доска меньше 2x2, или бомб меньше одной,
-                    // то стандартные условия
-                    boardSize = DEFAULT_BOARD_SIZE;
-                    numOfBombs = DEFAULT_NUM_OF_BOMBS;
+            if (Pattern.matches("\\d+", sizeOfField.getText()) && Pattern.matches("\\d+", bombsCount.getText())) {
+                int newBoardSize = Integer.parseInt(sizeOfField.getText());
+                int newNumOfBombs = Integer.parseInt(bombsCount.getText());
+                if ((newBoardSize * newBoardSize > newNumOfBombs) && (newBoardSize >= 2) && (newNumOfBombs >= 1)) {
+                    boardSize = newBoardSize;
+                    numOfBombs = newNumOfBombs;
                 }
                 appStage.close();
             }
