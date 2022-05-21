@@ -29,8 +29,26 @@ class MyTests {
     }
 
     @Test
-    fun test19Moves() {
+    fun test1() {
         val numbersArray: Array<IntArray> = arrayOf(intArrayOf(1, 2, 3, 0), intArrayOf(5, 6, 7, 8), intArrayOf(9, 10, 11, 12), intArrayOf(13, 14, 15, 4))
+
+        val board = Board(numbersArray)
+        val solver = Solver(board)
+
+        if (solver.isSolvable()) {
+            println("isSolvable")
+            assertEquals(needPosition.toString(), solver.solution().last().toString(), "isSolvable")
+            println("moves: ${solver.countMoves()}")
+        }
+        else {
+            println("isNotSolvable")
+            assertEquals("-1", solver.countMoves().toString(), "isNotSolvable")
+        }
+    }
+
+    @Test
+    fun test2() {
+        val numbersArray: Array<IntArray> = arrayOf(intArrayOf(1, 3, 5, 7), intArrayOf(9, 11, 13, 15), intArrayOf(0, 2, 4, 6), intArrayOf(8, 10, 12, 14))
 
         val board = Board(numbersArray)
         val solver = Solver(board)
