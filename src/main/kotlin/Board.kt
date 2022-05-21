@@ -1,3 +1,5 @@
+import kotlin.math.abs
+
 class Board(private val numbers: Array<IntArray>) {
     private var metric = 0 // the number of elements is out of place
     private var zeroCoordinates = Pair(-1, -1) // zero is an empty cell
@@ -5,7 +7,9 @@ class Board(private val numbers: Array<IntArray>) {
     init {
         for (i in numbers.indices) {
             for (j in numbers[i].indices) {
-                if (numbers[i][j] != i * numbersSize() + j + 1 && numbers[i][j] != 0) metric++
+                val needNumber = i * numbersSize() + j + 1
+                if (numbers[i][j] != needNumber && numbers[i][j] != 0) metric +=
+                    abs(numbers[i][j] - needNumber) / 4 + abs(numbers[i][j] - needNumber) % 4
                 if (numbers[i][j] == 0) zeroCoordinates = Pair(i, j)
             }
         }
@@ -90,7 +94,7 @@ class Board(private val numbers: Array<IntArray>) {
         for (i in numbers.indices) {
             for (j in numbers[i].indices) {
                 if (numbers[i][j] / 10 == 0) res += " "
-                res += "${ numbers[i][j] }"
+                res += "${numbers[i][j]}"
                 if (j != numbers[i].lastIndex) res += " "
             }
             if (i != numbers.lastIndex) res += "\n"
