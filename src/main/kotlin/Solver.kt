@@ -19,6 +19,13 @@ class Solver(private val initial: Board) {
             while (true) {
                 val thisNode = priorityQueue.poll()
 //                println(thisNode.board)
+//                val lolBoard = thisNode.board
+//                val lolMetric = metric(thisNode)
+                val lolSize = priorityQueue.size
+
+//                println(lolBoard)
+//                println(lolMetric)
+                println(lolSize)
 
                 if (thisNode.board.isNeedPosition()) {
                     saveResults(Node(thisNode, thisNode.board))
@@ -26,7 +33,8 @@ class Solver(private val initial: Board) {
                 }
 
                 for (thisBoard in thisNode.board.neighbors())
-                    if (!containsInPath(thisNode, thisBoard)) priorityQueue.add(Node(thisNode, thisBoard))
+                    if (!containsInPath(thisNode, thisBoard) && !containsInQueue(priorityQueue, thisBoard))
+                        priorityQueue.add(Node(thisNode, thisBoard))
 
             }
         }
@@ -38,6 +46,11 @@ class Solver(private val initial: Board) {
             if ((nowNode?.board ?: return false) == board) return true
             nowNode = nowNode.prevNode
         }
+    }
+
+    private fun containsInQueue(queue: PriorityQueue<Node>, board: Board): Boolean {
+        for (node in queue) if (node.board == board) return true
+        return false
     }
 
     private fun metric(node: Node): Int {
