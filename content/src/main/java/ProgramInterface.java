@@ -33,18 +33,24 @@ public class ProgramInterface {
                 }
             }
 
-            g2.setColor(Shapes.shapesColors[programLogic.currentNumber]);
-            for (int i = 0; i < 12; i++) {
-                for (int j = 0; j < 21; j++) {
-                    for (int k = 0; k < 4; k++) {
-                        Point point = Shapes.shapes[programLogic.currentNumber][programLogic.currentRotation][k];
-                        if (programLogic.shift.x + point.x == i && programLogic.shift.y + point.y == j) {
-                            g2.fillRect(i * (cubeWall + 1), j * (cubeWall + 1), cubeWall, cubeWall);
-                        }
-                    }
+            if (!programLogic.gameOver) {
+
+                g2.setColor(new Color(250, 250, 250));
+                int y = programLogic.solve? 0 : programLogic.futurePosition();
+                for (int k = 0; k < 4; k++) {
+                    Point point = Shapes.shapes[programLogic.currentNumber][programLogic.currentRotation][k];
+                    g2.fillRect((programLogic.shift.x + point.x) * (cubeWall + 1),
+                            (point.y + programLogic.shift.y + y) * (cubeWall + 1), cubeWall, cubeWall);
+                }
+
+                g2.setColor(Shapes.shapesColors[programLogic.currentNumber]);
+                for (int k = 0; k < 4; k++) {
+                    Point point = Shapes.shapes[programLogic.currentNumber][programLogic.currentRotation][k];
+                    g2.fillRect((programLogic.shift.x + point.x ) * (cubeWall + 1),
+                            (programLogic.shift.y + point.y) * (cubeWall + 1), cubeWall, cubeWall);
+
                 }
             }
-
         }
     }
 

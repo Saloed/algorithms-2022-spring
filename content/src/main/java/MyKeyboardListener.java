@@ -4,7 +4,7 @@ import java.awt.event.KeyListener;
 public class MyKeyboardListener implements KeyListener {
 
     private final ProgramLogic programLogic;
-    boolean block = false;
+    public boolean block = false;
 
     public MyKeyboardListener(ProgramLogic programLogic) {
         this.programLogic = programLogic;
@@ -14,9 +14,9 @@ public class MyKeyboardListener implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
 
-        if (!block) {
+        int keyCode = e.getKeyCode();
 
-            int keyCode = e.getKeyCode();
+        if (!block) {
 
             if (keyCode == KeyEvent.VK_UP) {
                 programLogic.upShapeRotate();
@@ -34,14 +34,22 @@ public class MyKeyboardListener implements KeyListener {
                 programLogic.shapeMove(1);
             }
 
-            if (keyCode == KeyEvent.VK_R) {
-                programLogic.setUpNewGame();
-            }
-
             if (keyCode == KeyEvent.VK_SPACE) {
                 programLogic.oneTick();
             }
 
+        }
+
+        if (keyCode == KeyEvent.VK_P) {
+            programLogic.setPause();
+        }
+
+        if (keyCode == KeyEvent.VK_F) {
+            programLogic.startSolve();
+        }
+
+        if (keyCode == KeyEvent.VK_R) {
+            programLogic.setUpNewGame();
         }
     }
 
