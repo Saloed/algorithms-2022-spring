@@ -9,7 +9,7 @@ class Board(private val numbers: Array<IntArray>) {
             for (j in numbers[i].indices) {
                 val needNumber = i * numbersSize() + j + 1
                 if (numbers[i][j] != needNumber && numbers[i][j] != 0) metric +=
-                    abs(numbers[i][j] - needNumber) / 4 + abs(numbers[i][j] - needNumber) % 4
+                    abs(numbers[i][j] - needNumber) / numbers.size + abs(numbers[i][j] - needNumber) % numbers[0].size
                 if (numbers[i][j] == 0) zeroCoordinates = Pair(i, j)
             }
         }
@@ -34,14 +34,12 @@ class Board(private val numbers: Array<IntArray>) {
 
     private fun turn(thisNumbers: Array<IntArray> = numbers, x1: Int, y1: Int, x2: Int, y2: Int): Board? {
         if (x2 < 0 || x2 > numbersSize() - 1 || y2 < 0 || y2 > numbersSize() - 1) return null
-        val temp = thisNumbers[x2][y2]
-        thisNumbers[x2][y2] = thisNumbers[x1][y1]
-        thisNumbers[x1][y1] = temp
+        thisNumbers[x1][y1] = thisNumbers[x2][y2].also { thisNumbers[x2][y2] = thisNumbers[x1][y1] }
         return Board(thisNumbers)
     }
 
-    fun neighbors(): List<Board> {
-        val neigh = mutableListOf<Board>()
+    fun neighbors(): Set<Board> {
+        val neigh = mutableSetOf<Board>()
         turn(
             getNewNumbers(),
             zeroCoordinates.first, zeroCoordinates.second,
