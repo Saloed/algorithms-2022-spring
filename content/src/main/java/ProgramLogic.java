@@ -38,6 +38,7 @@ public class ProgramLogic {
         setSolve(true);
     }
 
+
     public void toSolve() throws InterruptedException {
         placeShapeInBestPosition();
     }
