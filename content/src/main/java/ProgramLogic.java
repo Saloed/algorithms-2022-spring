@@ -4,33 +4,48 @@ import java.util.Queue;
 
 public class ProgramLogic {
 
-    private boolean gameOn = true;
-    public boolean gameOver = false;
-    public boolean pause = false;
-    public boolean solve = false;
+    private boolean gameProcess = true;
+    private boolean gameOver = false;
+    private boolean pause = false;
+    private boolean solve = false;
+    private boolean check = false;
 
-    public boolean check = false;
     private ProgramInterface programInterface;
     public Color[][] matrix = new Color[12][21];
     public Queue<Integer> allShapes = new ArrayDeque<>();
     public int amountOfShapes = 10;
-    public int clearedLines = 0;
+    public int clearedLines;
 
-    public int currentNumber;
+    public Point[][] currentShape;
     public int currentRotation;
+    public Color currentColor;
+
     public Point shift;
 
-    public MyKeyboardListener myKeyboardListener;
+    private MyKeyboardListener myKeyboardListener;
+
+    private void setCheck(boolean value) {
+        check = value;
+    }
+
+    public boolean getCheck() {
+        return check;
+    }
+
+    public void startSolve() {
+        myKeyboardListener.block = !myKeyboardListener.block;
+        setPause(false);
+        setSolve(true);
+    }
 
     public void toSolve() throws InterruptedException {
-
         placeShapeInBestPosition();
     }
 
-    public void placeShapeInBestPosition() throws InterruptedException {
+    public void placeShapeInBestPosition() {
         int x = 0;
-        int y = 0;
-        double score = 0.0;
+        int y;
+        double score;
         double bestScore = -1e6;
         int bestRotation = 0;
         currentRotation = -1;
@@ -40,8 +55,8 @@ public class ProgramLogic {
                 shift = new Point(i,0);
                 if (isBump(0, 0)) continue;
                 y = futurePosition();
-                for (Point point1: Shapes.shapes[currentNumber][currentRotation]) {
-                    matrix[point1.x + shift.x][point1.y + y] = Shapes.shapesColors[currentNumber];
+                for (Point point1: currentShape[currentRotation]) {
+                    matrix[point1.x + shift.x][point1.y + y] = currentColor;
                 }
                 //programInterface.repaint();
                 //Thread.sleep(200);
@@ -51,15 +66,14 @@ public class ProgramLogic {
                     bestRotation = k;
                     x = i;
                 }
-                for (Point point1: Shapes.shapes[currentNumber][currentRotation]) {
+                for (Point point1: currentShape[currentRotation]) {
                     matrix[point1.x + shift.x][point1.y + y] = programInterface.emptyColor;
                 }
             }
         }
         currentRotation = bestRotation;
         shift.x = x;
-        //shift.y = futurePosition();
-        check = false;
+        setCheck(false);
     }
 
     public double checkScore() {
@@ -126,10 +140,16 @@ public class ProgramLogic {
         return -0.184483 * bumpiness;
     }
 
+    public void setSolve(boolean value) {
+        this.solve = value;
+    }
+
+    public boolean getSolve() {
+        return solve;
+    }
 
     public boolean isBump(int x, int y) {
-        for (int i = 0; i < 4; i++) {
-            Point point = Shapes.shapes[currentNumber][currentRotation][i];
+        for (Point point: currentShape[currentRotation]) {
             if (matrix[point.x + shift.x + x][point.y + shift.y + y] != programInterface.emptyColor) {
                 return true;
             }
@@ -137,17 +157,10 @@ public class ProgramLogic {
         return false;
     }
 
-    public void startSolve() {
-        myKeyboardListener.block = !myKeyboardListener.block;
-        pause = false;
-        solve = true;
-    }
-
     public int futurePosition() {
         int minY = 2000;
-        for (int k = 0; k < 4; k++) {
+        for (Point point: currentShape[currentRotation]) {
             int y = 0;
-            Point point = Shapes.shapes[currentNumber][currentRotation][k];
             for (int j = point.y + shift.y + 1; j < 20; j++) {
                 if (matrix[point.x + shift.x][j] == programInterface.emptyColor) {
                     y++;
@@ -188,6 +201,8 @@ public class ProgramLogic {
     }
 
     public void shapeMove(int k) {
+        for (Point point: currentShape[currentRotation])
+            if (matrix[shift.x + point.x][shift.y + point.y + 1] != programInterface.emptyColor) return;
         if (!isBump(k, 0)) {
             shift.x += k;
             programInterface.repaint();
@@ -197,12 +212,10 @@ public class ProgramLogic {
     public void upShapeRotate() {
         if (currentRotation < 3) currentRotation++;
         else currentRotation = 0;
-        for (int i = 0; i < 4; i++) {
-            if (isBump(0, 0)) {
-                if (currentRotation > 0) currentRotation--;
-                else currentRotation = 3;
-                return;
-            }
+        if (isBump(0, 0)) {
+            if (currentRotation > 0) currentRotation--;
+            else currentRotation = 3;
+            return;
         }
         programInterface.repaint();
     }
@@ -210,13 +223,11 @@ public class ProgramLogic {
     public void downShapeRotate() {
         if (currentRotation > 0) currentRotation--;
         else currentRotation = 3;
-        for (int i = 0; i < 4; i++) {
-            if (isBump(0, 0)) {
-                if (currentRotation < 3) currentRotation++;
-                else currentRotation = 0;
-                return;
-            }
 
+        if (isBump(0, 0)) {
+            if (currentRotation < 3) currentRotation++;
+            else currentRotation = 0;
+            return;
         }
         programInterface.repaint();
     }
@@ -230,7 +241,7 @@ public class ProgramLogic {
     private void launchApplication() {
         Runnable r = ()->{
             try {
-                while (gameOn) {
+                while (gameProcess) {
                     if (!pause && !solve) {
                         Thread.sleep(1000);
                         if (!gameOver) {
@@ -268,6 +279,10 @@ public class ProgramLogic {
         if (gameOver) myKeyboardListener.block = true;
     }
 
+    public boolean getGameOver() {
+        return gameOver;
+    }
+
     public boolean isGameOver() {
         for (int k = 0; k < 4; k++) {
                 if (isBump(0, 0)) {
@@ -279,13 +294,13 @@ public class ProgramLogic {
     }
 
     public void newShape() {
-        check = true;
-
-        currentNumber = allShapes.peek();
+        setCheck(true);
+        currentRotation = (int) (Math.random() * 4);
+        currentShape = Shapes.shapes[allShapes.peek()];
+        currentColor = Shapes.shapesColors[allShapes.peek()];
         allShapes.remove();
         int numberOfNewShape = (int) (Math.random() * 7);
         allShapes.add(numberOfNewShape);
-        currentRotation = (int) (Math.random() * 4);
         shift = new Point(5, 0);
         if (isGameOver()) {
             setGameOver(true);
@@ -305,25 +320,26 @@ public class ProgramLogic {
     }
 
     public void stopShape() {
-        for (int i = 0; i < 4; i++) {
-            matrix[Shapes.shapes[currentNumber][currentRotation][i].x + shift.x]
-                    [Shapes.shapes[currentNumber][currentRotation][i].y + shift.y]
-                    = Shapes.shapesColors[currentNumber];
+        for (Point point: currentShape[currentRotation]) {
+            matrix[point.x + shift.x][point.y + shift.y] = currentColor;
         }
         newShape();
     }
 
-    public void setPause() {
-        myKeyboardListener.block = !myKeyboardListener.block;
-        pause = !pause;
+    public void setPause(boolean value) {
+        myKeyboardListener.block = value;
+        pause = value;
+    }
+
+    public boolean getPause() {
+        return pause;
     }
 
     public void setUpNewGame() {
         generateQueue();
-        solve = false;
-        pause = false;
+        setSolve(false);
+        setPause(false);
         setGameOver(false);
-        myKeyboardListener.block = false;
         clearedLines = 0;
         for (int i = 0; i < 12; i++) {
             for (int j = 0; j < 21; j++) {

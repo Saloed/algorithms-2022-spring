@@ -4,7 +4,7 @@ import java.awt.event.KeyListener;
 public class MyKeyboardListener implements KeyListener {
 
     private final ProgramLogic programLogic;
-    public boolean block = false;
+    public boolean block = true;
 
     public MyKeyboardListener(ProgramLogic programLogic) {
         this.programLogic = programLogic;
@@ -41,7 +41,7 @@ public class MyKeyboardListener implements KeyListener {
         }
 
         if (keyCode == KeyEvent.VK_P) {
-            programLogic.setPause();
+            programLogic.setPause(!programLogic.getPause());
         }
 
         if (keyCode == KeyEvent.VK_F) {

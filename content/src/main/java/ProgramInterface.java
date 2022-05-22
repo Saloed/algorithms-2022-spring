@@ -33,19 +33,17 @@ public class ProgramInterface {
                 }
             }
 
-            if (!programLogic.gameOver) {
+            if (!programLogic.getGameOver()) {
 
                 g2.setColor(new Color(250, 250, 250));
-                int y = programLogic.solve? 0 : programLogic.futurePosition();
-                for (int k = 0; k < 4; k++) {
-                    Point point = Shapes.shapes[programLogic.currentNumber][programLogic.currentRotation][k];
+                int y = programLogic.getSolve()? 0 : programLogic.futurePosition();
+                for (Point point: programLogic.currentShape[programLogic.currentRotation]) {
                     g2.fillRect((programLogic.shift.x + point.x) * (cubeWall + 1),
                             (point.y + programLogic.shift.y + y) * (cubeWall + 1), cubeWall, cubeWall);
                 }
 
-                g2.setColor(Shapes.shapesColors[programLogic.currentNumber]);
-                for (int k = 0; k < 4; k++) {
-                    Point point = Shapes.shapes[programLogic.currentNumber][programLogic.currentRotation][k];
+                g2.setColor(programLogic.currentColor);
+                for (Point point: programLogic.currentShape[programLogic.currentRotation]) {
                     g2.fillRect((programLogic.shift.x + point.x ) * (cubeWall + 1),
                             (programLogic.shift.y + point.y) * (cubeWall + 1), cubeWall, cubeWall);
 
