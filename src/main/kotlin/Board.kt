@@ -1,18 +1,19 @@
 import kotlin.math.abs
 
 class Board(private val numbers: Array<IntArray>) {
-    private var metric = 0 // the number of elements is out of place
+    private var metric = 0
     private var zeroCoordinates = Pair(-1, -1) // zero is an empty cell
 
     init {
-        for (i in numbers.indices) {
+        for (i in numbers.indices)
             for (j in numbers[i].indices) {
-                val needNumber = i * numbersSize() + j + 1
-                if (numbers[i][j] != needNumber && numbers[i][j] != 0) metric +=
-                    abs(numbers[i][j] - needNumber) / numbers.size + abs(numbers[i][j] - needNumber) % numbers[0].size
+                val needNumber = i * columnsSize() + j + 1
+                if (numbers[i][j] != needNumber && numbers[i][j] != 0) {
+                    metric++
+//                    metric += abs(numbers[i][j] - needNumber) / columnsSize() + abs(numbers[i][j] - needNumber) % rowSize()
+                }
                 if (numbers[i][j] == 0) zeroCoordinates = Pair(i, j)
             }
-        }
     }
 
     // for immutability
@@ -20,25 +21,18 @@ class Board(private val numbers: Array<IntArray>) {
     fun metric() = metric
     fun zeroCoordinates() = zeroCoordinates
 
-    private fun numbersSize() = numbers.size
+    private fun columnsSize() = numbers.size
+    private fun rowSize() = numbers[0].size
 
     fun isNeedPosition() = metric == 0
 
-    private fun findElement(i: Int, j: Int) = numbers[i][j]
-
-    private fun findCoordinates(number: Int): Pair<Int, Int> {
-        for (i in numbers.indices) for (j in numbers[i].indices)
-            if (numbers[i][j] == number) return Pair(i, j)
-        return Pair(-1, -1)
-    }
-
     private fun turn(thisNumbers: Array<IntArray> = numbers, x1: Int, y1: Int, x2: Int, y2: Int): Board? {
-        if (x2 < 0 || x2 > numbersSize() - 1 || y2 < 0 || y2 > numbersSize() - 1) return null
+        if (x2 < 0 || x2 > columnsSize() - 1 || y2 < 0 || y2 > columnsSize() - 1) return null
         thisNumbers[x1][y1] = thisNumbers[x2][y2].also { thisNumbers[x2][y2] = thisNumbers[x1][y1] }
         return Board(thisNumbers)
     }
 
-    fun neighbors(): Set<Board> {
+    fun neighborsWithMove(): Set<Board> {
         val neigh = mutableSetOf<Board>()
         turn(
             getNewNumbers(),
@@ -63,14 +57,24 @@ class Board(private val numbers: Array<IntArray>) {
         return neigh
     }
 
+    fun neighborsWithOutMove(): Set<Pair<Int, Int>> {
+        val neigh = mutableSetOf<Pair<Int, Int>>()
+        if (zeroCoordinates.first - 1 in 0 until columnsSize())
+            neigh.add(Pair(zeroCoordinates.first - 1, zeroCoordinates.second))
+        if (zeroCoordinates.first + 1 in 0 until columnsSize())
+            neigh.add(Pair(zeroCoordinates.first + 1, zeroCoordinates.second))
+        if (zeroCoordinates.second - 1 in 0 until rowSize())
+            neigh.add(Pair(zeroCoordinates.first, zeroCoordinates.second - 1))
+        if (zeroCoordinates.second + 1 in 0 until rowSize())
+            neigh.add(Pair(zeroCoordinates.first, zeroCoordinates.second + 1))
+        return neigh
+    }
+
     private fun getNewNumbers(): Array<IntArray> = deepCopy(numbers)
 
     private fun deepCopy(original: Array<IntArray>): Array<IntArray> {
-        val result = Array(original.size) { intArrayOf() }
-        for (i in original.indices) {
-            result[i] = IntArray(original[i].size)
-            for (j in original[i].indices) result[i][j] = original[i][j]
-        }
+        val result = Array(original.size) { IntArray(original[0].size) }
+        for (i in original.indices) for (j in original[i].indices) result[i][j] = original[i][j]
         return result
     }
 
@@ -79,7 +83,8 @@ class Board(private val numbers: Array<IntArray>) {
         if (other == null || other !is Board) return false
 
         val board: Board = other
-        if (board.numbersSize() != numbersSize()) return false
+        if (board.columnsSize() != columnsSize()) return false
+        if (board.rowSize() != rowSize()) return false
 
         for (i in numbers.indices) for (j in numbers[i].indices)
             if (numbers[i][j] != board.numbers[i][j]) return false
@@ -93,9 +98,9 @@ class Board(private val numbers: Array<IntArray>) {
             for (j in numbers[i].indices) {
                 if (numbers[i][j] / 10 == 0) res += " "
                 res += "${numbers[i][j]}"
-                if (j != numbers[i].lastIndex) res += " "
+                if (j != rowSize() - 1) res += " "
             }
-            if (i != numbers.lastIndex) res += "\n"
+            if (i != columnsSize() - 1) res += "\n"
         }
         return res
     }
