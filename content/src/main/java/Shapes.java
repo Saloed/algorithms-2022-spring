@@ -12,6 +12,7 @@ public class Shapes {
             new Color(135, 75, 27),
     };
 
+
     public static final Point[][][] shapes = {
             // | - Piece
             {
