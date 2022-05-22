@@ -29,7 +29,7 @@ class MyTests {
     }
 
     @Test
-    fun test1() {
+    fun test19() {
         val numbersArray: Array<IntArray> = arrayOf(intArrayOf(1, 2, 3, 0), intArrayOf(5, 6, 7, 8), intArrayOf(9, 10, 11, 12), intArrayOf(13, 14, 15, 4))
 
         val board = Board(numbersArray)
@@ -37,8 +37,9 @@ class MyTests {
 
         if (solver.isSolvable()) {
             println("isSolvable")
-            assertEquals(needPosition.toString(), solver.solution().last().toString(), "isSolvable")
+//            println("metric = ${solver.solution().last().metric()}")
             println("moves: ${solver.countMoves()}")
+            assertEquals(needPosition.toString(), solver.solution().last().toString(), "isSolvable")
         }
         else {
             println("isNotSolvable")

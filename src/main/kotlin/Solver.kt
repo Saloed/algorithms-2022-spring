@@ -9,32 +9,44 @@ class Solver(private val initial: Board) {
     )
 
     init {
-        if (isSolvable()) {
-            val priorityQueue = PriorityQueue<Node>(10) { node1, node2 ->
-                metric(node1).compareTo(metric(node2))
-            }
+        solve()
+    }
+
+    private fun solve() {
+        if (initial.isNeedPosition()) saveResults(Node(null, initial))
+        if (isSolvable() && !initial.isNeedPosition()) {
+            val priorityQueue = PriorityQueue<Node>(compareBy { metric(it) })
+//            { node1, node2 -> metric(node1).compareTo(metric(node2)) }
+            val setWithAllBoards = mutableSetOf<Board>()
+            val setWithPriorityQueue = mutableSetOf<Board>()
 
             priorityQueue.add(Node(null, initial))
 
             while (true) {
                 val thisNode = priorityQueue.poll()
+                setWithAllBoards.add(thisNode.board)
+                priorityQueue.remove(thisNode)
 //                println(thisNode.board)
 //                val lolBoard = thisNode.board
 //                val lolMetric = metric(thisNode)
-                val lolSize = priorityQueue.size
+//                val lolSize = priorityQueue.size
 
 //                println(lolBoard)
 //                println(lolMetric)
-                println(lolSize)
+//                println(lolSize)
 
-                if (thisNode.board.isNeedPosition()) {
-                    saveResults(Node(thisNode, thisNode.board))
-                    break
+                for (thisBoard in thisNode.board.neighbors()) {
+                    if (thisBoard in setWithAllBoards || thisBoard in setWithPriorityQueue) continue
+
+                    if (thisBoard.isNeedPosition()) {
+                        saveResults(Node(thisNode, thisBoard))
+                        return
+                    }
+//                    if (!containsInPath(thisNode, thisBoard) && !containsInQueue(priorityQueue, thisBoard)) {
+                    priorityQueue.add(Node(thisNode, thisBoard))
+                    setWithPriorityQueue.add(thisBoard)
+//                    }
                 }
-
-                for (thisBoard in thisNode.board.neighbors())
-                    if (!containsInPath(thisNode, thisBoard) && !containsInQueue(priorityQueue, thisBoard))
-                        priorityQueue.add(Node(thisNode, thisBoard))
 
             }
         }
@@ -58,7 +70,7 @@ class Solver(private val initial: Board) {
         var count = 0
         val metric = node.board.metric()
         while (true) {
-            count++
+//            count++
             nowNode = nowNode?.prevNode ?: return count + metric
         }
     }
@@ -100,8 +112,8 @@ class Solver(private val initial: Board) {
     private fun saveResults(node: Node) {
         var nowNode: Node? = node
         while (true) {
-            nowNode = nowNode?.prevNode ?: return winTrace.reverse()
-            winTrace.add(nowNode.board)
+            winTrace.add(nowNode?.board ?: return winTrace.reverse())
+            nowNode = nowNode.prevNode
         }
     }
 
