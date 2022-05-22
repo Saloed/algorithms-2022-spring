@@ -34,10 +34,9 @@ public class ProgramLogic {
 
     public void startSolve() {
         myKeyboardListener.block = !myKeyboardListener.block;
-        setPause(false);
-        setSolve(true);
+        setCheck(true);
+        setSolve(!getSolve());
     }
-
 
     public void toSolve() throws InterruptedException {
         placeShapeInBestPosition();
@@ -49,6 +48,7 @@ public class ProgramLogic {
         double score;
         double bestScore = -1e6;
         int bestRotation = 0;
+        int yOld = shift.y;
         currentRotation = -1;
         for (int k = 0; k < 4; k++) {
             currentRotation++;
@@ -59,8 +59,6 @@ public class ProgramLogic {
                 for (Point point1: currentShape[currentRotation]) {
                     matrix[point1.x + shift.x][point1.y + y] = currentColor;
                 }
-                //programInterface.repaint();
-                //Thread.sleep(200);
                 score = checkScore();
                 if (score > bestScore) {
                     bestScore = score;
@@ -74,6 +72,7 @@ public class ProgramLogic {
         }
         currentRotation = bestRotation;
         shift.x = x;
+        shift.y = yOld;
         setCheck(false);
     }
 
@@ -97,7 +96,6 @@ public class ProgramLogic {
             }
             height += height1;
         }
-        //return holes;
         return -0.510066 * height + -0.35663 * holes;
     }
 
@@ -248,12 +246,11 @@ public class ProgramLogic {
                         if (!gameOver) {
                             oneTick();
                         }
-                    }
-                    if (!pause) {
-                        if (solve && !gameOver) {
-                            if (check) toSolve();
+                    } else if (!pause) {
+                        if (!gameOver) {
+                            if (getCheck()) toSolve();
                             oneTick();
-                            Thread.sleep(5);
+                            Thread.sleep(15);
                         }
                     }
                     programInterface.repaint();
@@ -287,7 +284,6 @@ public class ProgramLogic {
     public boolean isGameOver() {
         for (int k = 0; k < 4; k++) {
                 if (isBump(0, 0)) {
-                    System.out.println(clearedLines);
                     return true;
                 }
         }

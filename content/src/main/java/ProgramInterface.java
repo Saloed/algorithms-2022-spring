@@ -34,7 +34,6 @@ public class ProgramInterface {
             }
 
             if (!programLogic.getGameOver()) {
-
                 g2.setColor(new Color(250, 250, 250));
                 int y = programLogic.getSolve()? 0 : programLogic.futurePosition();
                 for (Point point: programLogic.currentShape[programLogic.currentRotation]) {
@@ -46,9 +45,11 @@ public class ProgramInterface {
                 for (Point point: programLogic.currentShape[programLogic.currentRotation]) {
                     g2.fillRect((programLogic.shift.x + point.x ) * (cubeWall + 1),
                             (programLogic.shift.y + point.y) * (cubeWall + 1), cubeWall, cubeWall);
-
                 }
+
             }
+            g2.setColor(Color.WHITE);
+            g2.drawString("Cleared lines = " + programLogic.clearedLines, 40, 10);
         }
     }
 
@@ -121,11 +122,11 @@ public class ProgramInterface {
         Label welcomeLabel = new Label("Welcome! This is the Tetris!");
 
         Label keyLabel = new Label("Key list:");
-        Label upLabel = new Label("up arrow: rotate object to the left");
-        Label downLabel = new Label("down arrow: rotate object to the right");
-        Label leftLabel = new Label("left arrow: move object to the left");
-        Label rightLabel = new Label("right arrow: move object to the right");
-        Label spaceLabel = new Label("space: fast-forward object");
+        Label upLabel = new Label("W: rotate object to the left");
+        Label downLabel = new Label("S: rotate object to the right");
+        Label leftLabel = new Label("A: move object to the left");
+        Label rightLabel = new Label("D: move object to the right");
+        Label spaceLabel = new Label("Space: fast-forward object");
         Label rLabel = new Label("R: restart game");
         Label fLabel = new Label("F: start/stop auto-solver");
 

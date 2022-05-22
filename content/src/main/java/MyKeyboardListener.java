@@ -18,19 +18,19 @@ public class MyKeyboardListener implements KeyListener {
 
         if (!block) {
 
-            if (keyCode == KeyEvent.VK_UP) {
+            if (keyCode == KeyEvent.VK_W) {
                 programLogic.upShapeRotate();
             }
 
-            if (keyCode == KeyEvent.VK_DOWN) {
+            if (keyCode == KeyEvent.VK_S) {
                 programLogic.downShapeRotate();
             }
 
-            if (keyCode == KeyEvent.VK_LEFT) {
+            if (keyCode == KeyEvent.VK_A) {
                 programLogic.shapeMove(-1);
             }
 
-            if (keyCode == KeyEvent.VK_RIGHT) {
+            if (keyCode == KeyEvent.VK_D) {
                 programLogic.shapeMove(1);
             }
 
