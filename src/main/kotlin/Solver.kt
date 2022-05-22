@@ -3,7 +3,7 @@ import java.util.PriorityQueue
 class Solver(private val initial: Board) {
     private val winTrace: MutableList<Board> = mutableListOf()
 
-    private class Node(
+    private data class Node(
         val prevNode: Node?,
         val board: Board
     )
@@ -13,10 +13,18 @@ class Solver(private val initial: Board) {
     }
 
     private fun solve() {
-        if (initial.isNeedPosition()) saveResults(Node(null, initial))
-        if (isSolvable() && !initial.isNeedPosition()) {
-            val priorityQueue = PriorityQueue<Node>(compareBy { metric(it) })
-//            { node1, node2 -> metric(node1).compareTo(metric(node2)) }
+        val unsolvablePosition = Board(
+            arrayOf(
+                intArrayOf(1, 2, 3, 4),
+                intArrayOf(5, 6, 7, 8),
+                intArrayOf(9, 10, 11, 12),
+                intArrayOf(13, 15, 14, 0)
+            )
+        )
+        if (initial.isNeedPosition() || initial == unsolvablePosition) saveResults(Node(null, initial))
+        else {
+            val priorityQueue = PriorityQueue<Node>(compareBy { it.board.metric() })
+
             val setWithAllBoards = mutableSetOf<Board>()
             val setWithPriorityQueue = mutableSetOf<Board>()
 
@@ -26,26 +34,17 @@ class Solver(private val initial: Board) {
                 val thisNode = priorityQueue.poll()
                 setWithAllBoards.add(thisNode.board)
                 priorityQueue.remove(thisNode)
-//                println(thisNode.board)
-//                val lolBoard = thisNode.board
-//                val lolMetric = metric(thisNode)
-//                val lolSize = priorityQueue.size
 
-//                println(lolBoard)
-//                println(lolMetric)
-//                println(lolSize)
-
-                for (thisBoard in thisNode.board.neighbors()) {
+                for (thisBoard in thisNode.board.neighborsWithMove()) {
                     if (thisBoard in setWithAllBoards || thisBoard in setWithPriorityQueue) continue
 
-                    if (thisBoard.isNeedPosition()) {
+                    if (thisBoard.isNeedPosition() || thisBoard == unsolvablePosition) {
                         saveResults(Node(thisNode, thisBoard))
                         return
                     }
-//                    if (!containsInPath(thisNode, thisBoard) && !containsInQueue(priorityQueue, thisBoard)) {
+
                     priorityQueue.add(Node(thisNode, thisBoard))
                     setWithPriorityQueue.add(thisBoard)
-//                    }
                 }
 
             }
@@ -60,53 +59,14 @@ class Solver(private val initial: Board) {
         }
     }
 
-    private fun containsInQueue(queue: PriorityQueue<Node>, board: Board): Boolean {
-        for (node in queue) if (node.board == board) return true
-        return false
-    }
-
-    private fun metric(node: Node): Int {
+    private fun metricWithDeep(node: Node): Int {
         var nowNode: Node? = node
         var count = 0
         val metric = node.board.metric()
         while (true) {
-//            count++
+            count++
             nowNode = nowNode?.prevNode ?: return count + metric
         }
-    }
-
-    fun isSolvable(): Boolean {
-        val array = initial.numbers()
-        var count = 0
-        var isContinue = false
-        var prevDice = array[0][0]
-
-        if (prevDice == 0) {
-            prevDice = array[0][1]
-            isContinue = true
-        }
-        for (i in array.indices)
-            for (j in array[i].indices) {
-                if (i == 0 && j == 0) continue
-                if (isContinue) {
-                    isContinue = false
-                    continue
-                }
-                if (array[i][j] == 0) {
-                    if (j + 1 <= array[i].lastIndex) {
-                        if (prevDice > array[i][j + 1]) count++
-                        prevDice = array[i][j + 1]
-                    } else if (i + 1 <= array.lastIndex) {
-                        if (prevDice > array[i + 1][0]) count++
-                        prevDice = array[i + 1][0]
-                    }
-                    isContinue = true
-                    continue
-                }
-                if (prevDice > array[i][j]) count++
-                prevDice = array[i][j]
-            }
-        return (count + initial.zeroCoordinates().first + 1) % 2 == 0
     }
 
     private fun saveResults(node: Node) {
