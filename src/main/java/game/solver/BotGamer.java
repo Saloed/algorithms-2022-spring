@@ -78,21 +78,45 @@ public class BotGamer implements Model.OnOpenCellListener, Model.FlagManager {
         return neighbours;
     }
 
+//    Pair<GroupCell, GroupCell> getFirstContainsGroupOrNull() {
+//        GroupCell[] groupAsArray = getAllGroups().toArray(new GroupCell[0]);
+//        for (int i = 0; i < groupAsArray.length; i++) {
+//            for (int j = i + 1; j < groupAsArray.length; j++) {
+//                if (groupAsArray[i].contains(groupAsArray[j])) {
+//                    // если две группы имеют одни и те же клетки, но разное число мин
+//                    // и возвращаем группу с большим числом мин как бОльшую группу
+//                    if (groupAsArray[i].cells.size() == groupAsArray[j].cells.size()) {
+//                        return groupAsArray[i].minesCount > groupAsArray[j].minesCount ? new Pair<>(groupAsArray[i], groupAsArray[j]) : new Pair<>(groupAsArray[j], groupAsArray[i]);
+//                    }
+//                    return new Pair<>(groupAsArray[i], groupAsArray[j]);
+//                }
+//                if (groupAsArray[j].contains(groupAsArray[i]))
+//                    return new Pair<>(groupAsArray[j], groupAsArray[i]);
+//            }
+//        }
+//        return null;
+//    }
+
     // first (bigger) contains second (smaller)
     Pair<GroupCell, GroupCell> getFirstContainsGroupOrNull() {
-        GroupCell[] groupAsArray = getAllGroups().toArray(new GroupCell[0]);
-        for (int i = 0; i < groupAsArray.length; i++) {
-            for (int j = i + 1; j < groupAsArray.length; j++) {
-                if (groupAsArray[i].contains(groupAsArray[j])) {
-                    // если две группы имеют одни и те же клетки, но разное число мин
-                    // и возвращаем группу с большим числом мин как бОльшую группу
-                    if (groupAsArray[i].cells.size() == groupAsArray[j].cells.size()) {
-                        return groupAsArray[i].minesCount > groupAsArray[j].minesCount ? new Pair<>(groupAsArray[i], groupAsArray[j]) : new Pair<>(groupAsArray[j], groupAsArray[i]);
+        Map<SolverCell, Set<GroupCell>> cells = cellsToGroups.entrySet().stream().filter(it -> !it.getValue().isEmpty()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        for (Map.Entry<SolverCell, Set<GroupCell>> cell: cells.entrySet()) {
+            GroupCell[] groups = cell.getValue().toArray(GroupCell[]::new);
+
+            for (int i = 0; i < groups.length; i++) {
+                for (int j = i + 1; j < groups.length; j++) {
+                    if (groups[i].contains(groups[j])) {
+                        // если две группы имеют одни и те же клетки, но разное число мин
+                        // и возвращаем группу с большим числом мин как бОльшую группу
+                        if (groups[i].cells.size() == groups[j].cells.size()) {
+                            return groups[i].minesCount > groups[j].minesCount ? new Pair<>(groups[i], groups[j]) : new Pair<>(groups[j], groups[i]);
+                        }
+                        return new Pair<>(groups[i], groups[j]);
                     }
-                    return new Pair<>(groupAsArray[i], groupAsArray[j]);
+                    if (groups[j].contains(groups[i]))
+                        return new Pair<>(groups[j], groups[i]);
                 }
-                if (groupAsArray[j].contains(groupAsArray[i]))
-                    return new Pair<>(groupAsArray[j], groupAsArray[i]);
             }
         }
         return null;

@@ -129,14 +129,15 @@ public class Model {
         }
 
         private void openAllNulls(CellImpl cell) {
-            Set<CellImpl> visited = new HashSet<>();
-            Queue<CellImpl> intendToVisit = new LinkedList<>();
+            boolean[][] visited = new boolean[size][size];
+            List<CellImpl> intendToVisit = new LinkedList<>();
 
             intendToVisit.add(cell);
 
             while (!intendToVisit.isEmpty()) {
-                CellImpl current = intendToVisit.remove();
-                visited.add(current);
+                CellImpl current = intendToVisit.remove(0);
+                //visited.add(current);
+                visited[current.x][current.y] = true;
                 current.open();
                 onOpenCellListeners.forEach(it -> it.onOpenCell(current, false));
 
@@ -144,15 +145,25 @@ public class Model {
                     continue;
                 }
 
-                if (current.x > 0 && !cells[current.x - 1][current.y].hasBomb() && !visited.contains(cells[current.x - 1][current.y]))
-                    intendToVisit.add(cells[current.x - 1][current.y]);
-                if (current.x < size - 1 && !cells[current.x + 1][current.y].hasBomb() && !visited.contains(cells[current.x + 1][current.y]))
-                    intendToVisit.add(cells[current.x + 1][current.y]);
+//                if (current.x > 0 && !cells[current.x - 1][current.y].hasBomb() && !visited.contains(cells[current.x - 1][current.y]))
+//                    intendToVisit.add(cells[current.x - 1][current.y]);
+//                if (current.x < size - 1 && !cells[current.x + 1][current.y].hasBomb() && !visited.contains(cells[current.x + 1][current.y]))
+//                    intendToVisit.add(cells[current.x + 1][current.y]);
+//
+//                if (current.y > 0 && !cells[current.x][current.y - 1].hasBomb() && !visited.contains(cells[current.x][current.y - 1]))
+//                    intendToVisit.add(cells[current.x][current.y - 1]);
+//                if (current.y < size - 1 && !cells[current.x][current.y + 1].hasBomb() && !visited.contains(cells[current.x][current.y + 1]))
+//                    intendToVisit.add(cells[current.x][current.y + 1]);
 
-                if (current.y > 0 && !cells[current.x][current.y - 1].hasBomb() && !visited.contains(cells[current.x][current.y - 1]))
-                    intendToVisit.add(cells[current.x][current.y - 1]);
-                if (current.y < size - 1 && !cells[current.x][current.y + 1].hasBomb() && !visited.contains(cells[current.x][current.y + 1]))
-                    intendToVisit.add(cells[current.x][current.y + 1]);
+                if (current.x > 0 && !cells[current.x - 1][current.y].hasBomb() && !visited[current.x - 1][current.y])
+                    intendToVisit.add(0, cells[current.x - 1][current.y]);
+                if (current.x < size - 1 && !cells[current.x + 1][current.y].hasBomb() && !visited[current.x + 1][current.y])
+                    intendToVisit.add(0, cells[current.x + 1][current.y]);
+
+                if (current.y > 0 && !cells[current.x][current.y - 1].hasBomb() && !visited[current.x][current.y - 1])
+                    intendToVisit.add(0, cells[current.x][current.y - 1]);
+                if (current.y < size - 1 && !cells[current.x][current.y + 1].hasBomb() && !visited[current.x][current.y + 1])
+                    intendToVisit.add(0, cells[current.x][current.y + 1]);
             }
         }
 
