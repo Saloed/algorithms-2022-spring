@@ -1,11 +1,8 @@
 import com.almasb.fxgl.app.GameApplication;
 import game.Main;
 import game.components.Algorithm;
-import javafx.application.Platform;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.util.Arrays;
 
 import static game.components.GlobalVars.*;
 
@@ -15,7 +12,6 @@ public class GameTest {
     static Main main = new Main();
 
     public static void init() throws InterruptedException {
-
         t = new Thread(() -> GameApplication.launch(main.getClass(), new String[0]));
         t.start();
         Thread.sleep(1000);
@@ -26,15 +22,15 @@ public class GameTest {
         init();
         Algorithm algorithm = new Algorithm();
 
-
         GAME_INIT = true;
-        DIFFICULTY = 4;
 
-        while (!main.isGameOver()) {
+        while (!algorithm.isGameOver()) {
+            DIFFICULTY = 5;
             algorithm.minMax(1, 0, -500, +500);
+            DIFFICULTY = 5;
             Thread.sleep(500);
             algorithm.minMax(2, 0, -500, +500);
-            //  Platform.runLater(() -> main.resetGame());
         }
     }
+
 }

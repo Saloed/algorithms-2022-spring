@@ -13,8 +13,7 @@ import game.components.AiMove;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import static com.almasb.fxgl.dsl.FXGL.geto;
-import static com.almasb.fxgl.dsl.FXGL.texture;
+import static com.almasb.fxgl.dsl.FXGL.*;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 import static game.Textures.*;
 import static game.FieldParameters.*;
@@ -38,7 +37,6 @@ public class Factory implements EntityFactory {
 
     @Spawns("S")
     public Entity newSheep(SpawnData data) {
-
         return entityBuilder(data)
                 .type(SHEEP)
                 .viewWithBBox(texture(SHEEP_TEXTURE, CELL_SIZE, CELL_SIZE))

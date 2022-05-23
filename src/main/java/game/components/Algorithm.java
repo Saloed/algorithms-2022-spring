@@ -9,11 +9,11 @@ import static game.Type.*;
 import static game.components.GlobalVars.*;
 
 public class Algorithm {
-
+    int count = 0;
     public AiMove wolfMoveComponent = new AiMove();
     final Pair<Integer, Integer>[] moves = new Pair[]{
-            new Pair<>(+1, -1),
             new Pair<>(+1, +1),
+            new Pair<>(+1, -1),
             new Pair<>(-1, -1),
             new Pair<>(-1, +1)
     };
@@ -25,7 +25,7 @@ public class Algorithm {
         if (recursiveLvl == 0) prepareField();
         int test;
 
-        if (recursiveLvl >= 2*DIFFICULTY) {
+        if (recursiveLvl >= 2 * DIFFICULTY) {
             int evaluation = getEvaluation();
             prepareField();
             return evaluation;
@@ -66,6 +66,8 @@ public class Algorithm {
         }
 
         if (recursiveLvl == 0) {
+            System.out.println(count);
+            count = 0;
             if (entity == 2) {
                 wolfs[bestMove / 2].setCoordinate(wolfs[bestMove / 2].getCoordinate().addTo(moves[bestMove % 2]));
                 prepareField();
@@ -74,12 +76,14 @@ public class Algorithm {
             } else {
                 SHEEP.setCoordinate(SHEEP.getCoordinate().addTo(moves[bestMove % 4]));
                 prepareField();
-                wolfMoveComponent.moveWolf(SHEEP);}
+                wolfMoveComponent.moveWolf(SHEEP);
+            }
         }
         return MinMax;
     }
 
     public void entityMove(int curEntity, int y, int x) {
+        count++;
         if (curEntity == 0) {
             array[SHEEP.getY()][SHEEP.getX()] = 0;
             array[SHEEP.getY() + y][SHEEP.getX() + x] = 1;
@@ -100,34 +104,68 @@ public class Algorithm {
         for (Type wolf : wolfs) array[wolf.getY()][wolf.getX()] = 255;
     }
 
-    public int getEvaluation() {
-        if (SHEEP.getY() == 0) return 0;
 
-        stack.clear();
-        stack.push(SHEEP.getCoordinate());
-        while (!stack.isEmpty()) {
-            Pair<Integer, Integer> currentPosition = stack.pop();
-            for (int i = 0; i < 4; i++) {
-                if (canMove(currentPosition.getFirst() + moves[i].getFirst(), currentPosition.getSecond() + moves[i].getSecond())) {
-                    Pair<Integer, Integer> newPosition = currentPosition.addTo(moves[i]);
-                    array[newPosition.getFirst()][newPosition.getSecond()] = array[currentPosition.getFirst()][currentPosition.getSecond()] + 1;
-                    stack.push(newPosition);
+        public int getEvaluation() {
+
+            if (SHEEP.getY() == 0) return 0;
+            int minCycle = 200;
+            boolean minActive = false;
+            stack.clear();
+            stack.push(SHEEP.getCoordinate());
+
+            while (!stack.isEmpty()) {
+                Pair<Integer, Integer> currentPosition = stack.pop();
+                for (int i = 0; i < 4; i++) {
+                    if (canMove(currentPosition.getFirst() + moves[i].getFirst(), currentPosition.getSecond() + moves[i].getSecond())) {
+                        Pair<Integer, Integer> newPosition = currentPosition.addTo(moves[i]);
+                        array[newPosition.getFirst()][newPosition.getSecond()] = array[currentPosition.getFirst()][currentPosition.getSecond()] + 1;
+                        if (newPosition.getFirst() == 0) {
+                            minCycle = Math.min(minCycle, array[0][newPosition.getSecond()]);
+                            minActive = true;
+                        }
+                        if (minActive) {
+                            if (array[newPosition.getFirst()][newPosition.getSecond()] < minCycle)
+                                stack.push(newPosition);
+                        } else
+                            stack.push(newPosition);
+                    }
                 }
-
             }
-        }
-        int min = MAX_VALUE;
 
-        for (int i = 0; i < 4; i++) {
-            if (array[0][i * 2 + 1] > MIN_VALUE && array[0][i * 2 + 1] < min)
-                min = array[0][i * 2 + 1];
+            int min = MAX_VALUE;
+
+            for (int i = 0; i < 4; i++) {
+                if (array[0][i * 2 + 1] > MIN_VALUE && array[0][i * 2 + 1] < min)
+                    min = array[0][i * 2 + 1];
+            }
+            return min - 1;
         }
-        return min - 1;
-    }
 
     public boolean canMove(int y, int x) {
         if (!(x >= 0 && y >= 0 && x <= 7 && y <= 7)) return false;
-
         return array[y][x] == 0;
+    }
+
+    public boolean isGameOver() {
+        if (SHEEP.getX() == 0 && SHEEP.getY() == 7 && array[6][1] != 0)
+            return true;
+        if (SHEEP.getX() == 0 && SHEEP.getY() < 7)
+            if ((array[SHEEP.getY() + 1][SHEEP.getX() + 1] != 0 && array[SHEEP.getY() - 1][SHEEP.getX() + 1] != 0))
+                return true;
+        if (SHEEP.getY() == 7)
+            if (array[SHEEP.getY() - 1][SHEEP.getX() + 1] != 0 && array[SHEEP.getY() - 1][SHEEP.getX() - 1] != 0)
+                return true;
+        if (SHEEP.getX() == 7)
+            if (array[SHEEP.getY() - 1][SHEEP.getX() - 1] != 0 && array[SHEEP.getY() + 1][SHEEP.getX() - 1] != 0)
+                return true;
+        if (SHEEP.getX() != 0 && SHEEP.getY() != 7 && SHEEP.getX() != 7 && SHEEP.getY() != 0)
+            if (array[SHEEP.getY() - 1][SHEEP.getX() - 1] != 0 && array[SHEEP.getY() + 1][SHEEP.getX() - 1] != 0
+                    && array[SHEEP.getY() - 1][SHEEP.getX() + 1] != 0 && array[SHEEP.getY() + 1][SHEEP.getX() + 1] != 0)
+                return true;
+        int countY = 0;
+        for (int i = 1; i < 5; i++) {
+            if (Type.values()[i].getY() >= SHEEP.getY()) countY++;
+        }
+        return countY == 4;
     }
 }

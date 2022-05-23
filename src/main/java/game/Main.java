@@ -93,7 +93,7 @@ public class Main extends GameApplication {
                     } else
                         algorithm.minMax(1, 0, -500, +500);
                 }
-                if (isGameOver()) {
+                if (algorithm.isGameOver()) {
                     GAME_INIT = false;
                     resetGame();
                 }
@@ -114,6 +114,7 @@ public class Main extends GameApplication {
 
                     wolf.setCoordinate(new Pair<>(y, x));
                     array[y][x] = 0;
+                    algorithm.prepareField();
                     return true;
                 }
             }
@@ -129,28 +130,6 @@ public class Main extends GameApplication {
         return null;
     }
 
-    public boolean isGameOver() {
-        if (SHEEP.getX() == 0 && SHEEP.getY() == 7 && array[6][1] != 0)
-            return true;
-        if (SHEEP.getX() == 0 && SHEEP.getY() < 7)
-            if ((array[SHEEP.getY() + 1][SHEEP.getX() + 1] != 0 && array[SHEEP.getY() - 1][SHEEP.getX() + 1] != 0))
-                return true;
-        if (SHEEP.getY() == 7)
-            if (array[SHEEP.getY() - 1][SHEEP.getX() + 1] != 0 && array[SHEEP.getY() - 1][SHEEP.getX() - 1] != 0)
-                return true;
-        if (SHEEP.getX() == 7)
-            if (array[SHEEP.getY() - 1][SHEEP.getX() - 1] != 0 && array[SHEEP.getY() + 1][SHEEP.getX() - 1] != 0)
-                return true;
-        if (SHEEP.getX() != 0 && SHEEP.getY() != 7 && SHEEP.getX() != 7 && SHEEP.getY() != 0)
-            if (array[SHEEP.getY() - 1][SHEEP.getX() - 1] != 0 && array[SHEEP.getY() + 1][SHEEP.getX() - 1] != 0
-                    && array[SHEEP.getY() - 1][SHEEP.getX() + 1] != 0 && array[SHEEP.getY() + 1][SHEEP.getX() + 1] != 0)
-                return true;
-        int countY = 0;
-        for (int i = 1; i < 5; i++) {
-            if (Type.values()[i].getY() >= SHEEP.getY()) countY++;
-        }
-        return countY == 4;
-    }
 
     public void resetGame() {
         getGameWorld().getEntitiesCopy().forEach(Entity::removeFromWorld);
@@ -195,8 +174,8 @@ public class Main extends GameApplication {
         WOLF4.setCoordinate(new Pair<>(0, 7));
         wolf4 = spawn("W4", 400, 50);
 
-        sheep = spawn("S", 50, 400);
-        SHEEP.setCoordinate(new Pair<>(7, 0));
+        sheep = spawn("S", 250, 400);
+        SHEEP.setCoordinate(new Pair<>(7, 4));
 
         algorithm.prepareField();
     }
@@ -209,9 +188,9 @@ public class Main extends GameApplication {
         setUpPlayer.put("Woolf", () -> PLAYER_TYPE = 2);
         setUpPlayer.put("Sheep", () -> PLAYER_TYPE = 1);
         setUpDifficulty.put("Easy", () -> DIFFICULTY = 1);
-        setUpDifficulty.put("Medium", () -> DIFFICULTY = 2);
-        setUpDifficulty.put("Hard", () -> DIFFICULTY = 3);
-        setUpDifficulty.put("Incredible", () -> DIFFICULTY = 3.5);
+        setUpDifficulty.put("Medium", () -> DIFFICULTY = 1.5);
+        setUpDifficulty.put("Hard", () -> DIFFICULTY = 4);
+        setUpDifficulty.put("Incredible", () -> DIFFICULTY = 6.5);
 
         ChoiceBox<String> cbDialogs = getUIFactoryService().newChoiceBox(FXCollections.observableArrayList(setUpPlayer.keySet()));
         cbDialogs.getSelectionModel().selectFirst();
