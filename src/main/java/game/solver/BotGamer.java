@@ -126,7 +126,7 @@ public class BotGamer implements Model.OnOpenCellListener, Model.FlagManager {
      * Возвращает все группы, в которые входит cell
      */
     Set<GroupCell> getGroups(int x, int y) {
-        return cellsToGroups.get(cells[x][y]);
+        return new HashSet<>(cellsToGroups.get(cells[x][y]));
     }
 
     void restructureGroups() {
@@ -153,7 +153,6 @@ public class BotGamer implements Model.OnOpenCellListener, Model.FlagManager {
 
             containsGroups = getFirstContainsGroupOrNull();
         }
-
     }
 
     private void makeGroups() {

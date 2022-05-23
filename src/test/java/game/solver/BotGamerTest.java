@@ -85,11 +85,11 @@ public class BotGamerTest {
         TestBoard board = new TestBoard(3, 2);
         BotGamer botGamer = new BotGamer(board, emptyFlagManager);
 
-        //  !2   *(B)   *
-        //   2   *(B)   2
-        //   *     1   !1
+        // !2  2  *
+        //  *  *  1
+        //  *  2 !1
 
-        // ! - создали группы имнно для этих ячеек, для наглядности работы алгоритма
+        // ! - создали группы именно для этих ячеек, для наглядности работы алгоритма
         // В группе от 0,0 содержится две ячейки, а в группе от 2,2 - 1. Однако группа от 0,0 содержит в себе группу от 2,2.
         // Поэтому метод вернет пару от GroupCell, где первый элемент пары - больший GroupCell (где больше Set от cells).
 
@@ -138,15 +138,11 @@ public class BotGamerTest {
         TestBoard board = new TestBoard(3, 3);
         BotGamer botGamer = new BotGamer(board, emptyFlagManager);
 
-        //  0    1    *
-        //  1    3    2
-        //  *    *    *
+        //   0   1  (B)
+        //   1   3   *
+        //  (B)  2  (B)
 
         // Тест на однозначность нахождения бомб
-
-        //  0     1     *
-        //  1     3     2
-        //  *    !0     *
 
         board.setNeighbourBombs(1, 1, 3);
         board.openCell(1, 1);

@@ -43,13 +43,13 @@ public class View extends Application {
     private final Stage appStage = new Stage();
     private final Stage messageStage = new Stage();
     
-    public static int boardSize = 10;
+    private static int boardSize = 10;
 
-    public static double tileSize;
+    private static double tileSize;
 
     private int numOfBombs = 15;
 
-    public static Group tileGroup = new Group();
+    private final Group tileGroup = new Group();
 
     private final Button buttonHint = new Button("Hint");
     private final Button buttonSolver = new Button("Solver");
@@ -77,7 +77,7 @@ public class View extends Application {
         });
         flag.setFill(FLAG_NOT_SELECTED);
 
-        buttonSolver.relocate(MAIN_BOARD_SIZE / 2.0 + 465, MAIN_BOARD_SIZE - 300); //
+        buttonSolver.relocate(MAIN_BOARD_SIZE / 2.0 + 465, MAIN_BOARD_SIZE - 300);
         buttonSolver.setStyle("-fx-background-color: orange; -fx-text-fill: white");
         buttonSolver.setFont(font);
         buttonHint.relocate(MAIN_BOARD_SIZE / 2.0 + 470, MAIN_BOARD_SIZE - 350); //
