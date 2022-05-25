@@ -1,6 +1,5 @@
 import java.awt.*;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.*;
 
 public class ProgramLogic {
 
@@ -31,62 +30,74 @@ public class ProgramLogic {
 
     public CurrentShape currentShape;
 
+    public int limit;
+    public double[] bestScore;
 
-    public double bestScore;
-    public Color[][] bestMatrix;
-    public ArrayDeque<Integer> bestQueue;
+    public ArrayDeque<Integer> bestXAndRotation;
+
     public boolean mySolverSecond = false;
+    public boolean changeShape = true;
 
     private MyKeyboardListener myKeyboardListener;
 
     public void solverSecond() {
+        limit = 8;
+        bestScore = new double[limit + 1];
         mySolverSecond = true;
-        bestScore = -1e6;
-        bestMatrix = new Color[12][21];
-        dfs(matrix, allShapes, 0);
-        matrix = bestMatrix.clone();
+        for (int i = 0; i < limit + 1; i++) {
+            bestScore[i] = -1e6;
+        }
+        dfs(matrix, allShapes, new ArrayDeque<>(), 0);
         programInterface.repaint();
+        System.out.println(Arrays.toString(bestScore));
         //bestMatrix = new Color[12][21];
         //programInterface.repaint();
     }
 
 
-    public void dfs(Color[][] matrix, ArrayDeque<Integer> allShapes, int depth) {
+    public void dfs(Color[][] matrix, ArrayDeque<Integer> allShapes, ArrayDeque<Integer> xAndRotation, int depth) {
         double currScore = checkScore(matrix);
-        if (currScore < 0.95 * bestScore) return;
 
-        if (depth == 9) {
-            if (currScore > bestScore) {
-                bestScore = currScore;
-                bestMatrix = matrix;
-                bestQueue = allShapes;
+        if (currScore < 0 || bestScore[depth] < 0) {
+            if (-1 * currScore > -1 * 0.9 * bestScore[depth]) return;
+        }
+
+        if (depth == limit) {
+            if (currScore > bestScore[limit]) {
+                bestXAndRotation = xAndRotation.clone();
+                bestScore[limit] = currScore;
             }
             return;
+        }
+
+        if (currScore > bestScore[depth]) {
+            bestScore[depth] = currScore;
         }
 
         clearFullRows(matrix);
 
         ArrayDeque<Integer> allShapesHelp = allShapes.clone();
-        CurrentShape currentShape = newShape(allShapesHelp, matrix);
+        CurrentShape currentShape = newShape(allShapesHelp);
         currentShape.currentRotation = 0;
         for (int k = 0; k < 4; k++) {
             for (int i = 1; i < 11; i++) {
                 Color[][] matrixHelp = new Color[12][21];
                 for (int iHelp = 0; iHelp < 12; iHelp++) {
-                    for (int jHelp = 0; jHelp < 21; jHelp++) {
-                        matrixHelp[iHelp][jHelp] = matrix[iHelp][jHelp];
-                    }
+                    System.arraycopy(matrix[iHelp], 0, matrixHelp[iHelp], 0, 21);
                 }
                 currentShape.shift = new Point(i,0);
                 if (isBump(0, 0, matrixHelp, currentShape)) continue;
                 int y = futurePosition(matrixHelp, currentShape);
-                for (Point point1: currentShape.shapeCoordinates[k]) {
+                for (Point point1: currentShape.shapeCoordinates[currentShape.currentRotation]) {
                     matrixHelp[point1.x + currentShape.shift.x][point1.y + y] = currentShape.currentColor;
                 }
 
-                dfs(matrixHelp, allShapesHelp.clone(), depth + 1);
+                ArrayDeque<Integer> xAndRotationHelp = xAndRotation.clone();
+                xAndRotationHelp.add(currentShape.shift.x * 100 + currentShape.currentRotation);
+
+                dfs(matrixHelp, allShapesHelp.clone(), xAndRotationHelp, depth + 1);
             }
-            currentShape.currentRotation += 1;
+            currentShape.currentRotation++;
         }
     }
 
@@ -290,10 +301,10 @@ public class ProgramLogic {
     }
 
     public void downShapeRotate(Color[][] matrix, CurrentShape currentShape) {
-        if (currentShape.currentRotation > 0) currentShape.currentRotation++;
+        if (currentShape.currentRotation > 0) currentShape.currentRotation--;
         else currentShape.currentRotation = 3;
         if (isBump(0, 0, matrix, currentShape)) {
-            if (currentShape.currentRotation < 3) currentShape.currentRotation--;
+            if (currentShape.currentRotation < 3) currentShape.currentRotation++;
             else currentShape.currentRotation = 0;
             return;
         }
@@ -308,22 +319,40 @@ public class ProgramLogic {
     //Run of the process
     private void launchApplication() {
         Runnable r = ()->{
-            while (gameProcess) {
-                /*if (!mySolverSecond) {
-                    if (!pause && !solve) {
+            try {
+                while (gameProcess) {
+
+
+                    if (!pause && !mySolverSecond) {
                         Thread.sleep(1000);
                         if (!gameOver) {
-                            oneTick();
+                            oneTick(matrix, currentShape);
                         }
+
                     } else if (!pause) {
                         if (!gameOver) {
-                            if (getCheck()) toSolve();
-                            oneTick();
-                            Thread.sleep(15);
+                            if (limit == 0) {
+                                solverSecond();
+                            } else {
+                                if (changeShape) {
+                                    System.out.println("score = " + checkScore(matrix));
+                                    int a = bestXAndRotation.pollLast();
+                                    currentShape.currentRotation = a  % 10;
+                                    currentShape.shift.x = a / 100;
+                                    limit--;
+                                    changeShape = false;
+                                }
+
+                                oneTick(matrix, currentShape);
+                                Thread.sleep(50);
+                            }
                         }
                     }
-                }*/
-                programInterface.repaint();
+
+                    programInterface.repaint();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         };
 
@@ -350,14 +379,14 @@ public class ProgramLogic {
 
     public boolean isGameOver(Color[][] matrix, CurrentShape currentShape) {
         for (int k = 0; k < 4; k++) {
-                if (isBump(0, 0, matrix, currentShape)) {
-                    return true;
-                }
+            if (isBump(0, 0, matrix, currentShape)) {
+                return true;
+            }
         }
         return false;
     }
 
-    public CurrentShape newShape(ArrayDeque<Integer> allShapes, Color[][] matrix) {
+    public CurrentShape newShape(ArrayDeque<Integer> allShapes) {
         setCheck(true);
         CurrentShape currentShape = new CurrentShape(allShapes.peek());
         currentShape.currentRotation = (int) (Math.random() * 4);
@@ -385,7 +414,8 @@ public class ProgramLogic {
         for (Point point: currentShape.shapeCoordinates[currentShape.currentRotation]) {
             matrix[point.x + currentShape.shift.x][point.y + currentShape.shift.y] = currentShape.currentColor;
         }
-        this.currentShape = newShape(allShapes, matrix);
+        changeShape = true;
+        this.currentShape = newShape(allShapes);
     }
 
     public void setPause(boolean value) {
@@ -399,6 +429,8 @@ public class ProgramLogic {
 
     public void setUpNewGame() {
         generateQueue();
+        mySolverSecond = false;
+        limit = 0;
         setSolve(false);
         setPause(false);
         setGameOver(false);
@@ -409,7 +441,7 @@ public class ProgramLogic {
                 else matrix[i][j] = programInterface.emptyColor;
             }
         }
-        this.currentShape = newShape(allShapes, matrix);
+        this.currentShape = newShape(allShapes);
         programInterface.repaint();
     }
 
@@ -421,4 +453,3 @@ public class ProgramLogic {
     }
 
 }
-

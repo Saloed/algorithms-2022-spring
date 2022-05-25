@@ -55,7 +55,7 @@ public class MyKeyboardListener implements KeyListener {
 
 
         if (keyCode == KeyEvent.VK_B) {
-            programLogic.solverSecond();
+            programLogic.mySolverSecond = true;
         }
     }
 
