@@ -28,25 +28,26 @@ public class ProgramInterface {
             g2.fillRect(0, 0, width, height);
             for (int i = 0; i < 12; i++) {
                 for (int j = 0; j < 21; j++) {
-                    g2.setColor(matrix[i][j]);
+                    g2.setColor(programLogic.matrix[i][j]);
                     g2.fillRect(i * (cubeWall + 1), j * (cubeWall + 1), cubeWall, cubeWall);
                 }
             }
 
             if (!programLogic.getGameOver()) {
-                g2.setColor(new Color(250, 250, 250));
-                int y = programLogic.getSolve()? 0 : programLogic.futurePosition();
-                for (Point point: programLogic.currentShape[programLogic.currentRotation]) {
-                    g2.fillRect((programLogic.shift.x + point.x) * (cubeWall + 1),
-                            (point.y + programLogic.shift.y + y) * (cubeWall + 1), cubeWall, cubeWall);
+                if (false) {
+                    g2.setColor(new Color(250, 250, 250));
+                    int y = programLogic.getSolve() ? 0 : programLogic.futurePosition(programLogic.matrix, programLogic.currentShape);
+                    for (Point point : programLogic.currentShape.shapeCoordinates[programLogic.currentShape.currentRotation]) {
+                        g2.fillRect((programLogic.currentShape.shift.x + point.x) * (cubeWall + 1),
+                                (point.y + programLogic.currentShape.shift.y + y) * (cubeWall + 1), cubeWall, cubeWall);
+                    }
                 }
 
-                g2.setColor(programLogic.currentColor);
-                for (Point point: programLogic.currentShape[programLogic.currentRotation]) {
-                    g2.fillRect((programLogic.shift.x + point.x ) * (cubeWall + 1),
-                            (programLogic.shift.y + point.y) * (cubeWall + 1), cubeWall, cubeWall);
+                g2.setColor(programLogic.currentShape.currentColor);
+                for (Point point : programLogic.currentShape.shapeCoordinates[programLogic.currentShape.currentRotation]) {
+                    g2.fillRect((programLogic.currentShape.shift.x + point.x) * (cubeWall + 1),
+                            (point.y + programLogic.currentShape.shift.y) * (cubeWall + 1), cubeWall, cubeWall);
                 }
-
             }
             g2.setColor(Color.WHITE);
             g2.drawString("Cleared lines = " + programLogic.clearedLines, 40, 10);

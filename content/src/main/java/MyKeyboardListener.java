@@ -19,23 +19,23 @@ public class MyKeyboardListener implements KeyListener {
         if (!block) {
 
             if (keyCode == KeyEvent.VK_W) {
-                programLogic.upShapeRotate();
+                programLogic.upShapeRotate(programLogic.matrix, programLogic.currentShape);
             }
 
             if (keyCode == KeyEvent.VK_S) {
-                programLogic.downShapeRotate();
+                programLogic.downShapeRotate(programLogic.matrix, programLogic.currentShape);
             }
 
             if (keyCode == KeyEvent.VK_A) {
-                programLogic.shapeMove(-1);
+                programLogic.shapeMove(-1, programLogic.matrix, programLogic.currentShape);
             }
 
             if (keyCode == KeyEvent.VK_D) {
-                programLogic.shapeMove(1);
+                programLogic.shapeMove(1, programLogic.matrix, programLogic.currentShape);
             }
 
             if (keyCode == KeyEvent.VK_SPACE) {
-                programLogic.oneTick();
+                programLogic.oneTick(programLogic.matrix, programLogic.currentShape);
             }
 
         }
@@ -50,6 +50,12 @@ public class MyKeyboardListener implements KeyListener {
 
         if (keyCode == KeyEvent.VK_R) {
             programLogic.setUpNewGame();
+        }
+
+
+
+        if (keyCode == KeyEvent.VK_B) {
+            programLogic.solverSecond();
         }
     }
 

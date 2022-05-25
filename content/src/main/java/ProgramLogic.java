@@ -4,6 +4,19 @@ import java.util.Queue;
 
 public class ProgramLogic {
 
+
+    public class CurrentShape {
+        public Point[][] shapeCoordinates;
+        public int currentRotation = 0;
+        public Color currentColor;
+        public Point shift = new Point(5, 0);
+
+        public CurrentShape(int number) {
+            this.shapeCoordinates = Shapes.shapes[number];
+            this.currentColor = Shapes.shapesColors[number];
+        }
+    }
+
     private boolean gameProcess = true;
     private boolean gameOver = false;
     private boolean pause = false;
@@ -12,17 +25,71 @@ public class ProgramLogic {
 
     private ProgramInterface programInterface;
     public Color[][] matrix = new Color[12][21];
-    public Queue<Integer> allShapes = new ArrayDeque<>();
+    public ArrayDeque<Integer> allShapes = new ArrayDeque<>();
     public int amountOfShapes = 10;
     public int clearedLines;
 
-    public Point[][] currentShape;
-    public int currentRotation;
-    public Color currentColor;
+    public CurrentShape currentShape;
 
-    public Point shift;
+
+    public double bestScore;
+    public Color[][] bestMatrix;
+    public ArrayDeque<Integer> bestQueue;
+    public boolean mySolverSecond = false;
 
     private MyKeyboardListener myKeyboardListener;
+
+    public void solverSecond() {
+        mySolverSecond = true;
+        bestScore = -1e6;
+        bestMatrix = new Color[12][21];
+        dfs(matrix, allShapes, 0);
+        matrix = bestMatrix.clone();
+        programInterface.repaint();
+        //bestMatrix = new Color[12][21];
+        //programInterface.repaint();
+    }
+
+
+    public void dfs(Color[][] matrix, ArrayDeque<Integer> allShapes, int depth) {
+        double currScore = checkScore(matrix);
+        if (currScore < 0.95 * bestScore) return;
+
+        if (depth == 9) {
+            if (currScore > bestScore) {
+                bestScore = currScore;
+                bestMatrix = matrix;
+                bestQueue = allShapes;
+            }
+            return;
+        }
+
+        clearFullRows(matrix);
+
+        ArrayDeque<Integer> allShapesHelp = allShapes.clone();
+        CurrentShape currentShape = newShape(allShapesHelp, matrix);
+        currentShape.currentRotation = 0;
+        for (int k = 0; k < 4; k++) {
+            for (int i = 1; i < 11; i++) {
+                Color[][] matrixHelp = new Color[12][21];
+                for (int iHelp = 0; iHelp < 12; iHelp++) {
+                    for (int jHelp = 0; jHelp < 21; jHelp++) {
+                        matrixHelp[iHelp][jHelp] = matrix[iHelp][jHelp];
+                    }
+                }
+                currentShape.shift = new Point(i,0);
+                if (isBump(0, 0, matrixHelp, currentShape)) continue;
+                int y = futurePosition(matrixHelp, currentShape);
+                for (Point point1: currentShape.shapeCoordinates[k]) {
+                    matrixHelp[point1.x + currentShape.shift.x][point1.y + y] = currentShape.currentColor;
+                }
+
+                dfs(matrixHelp, allShapesHelp.clone(), depth + 1);
+            }
+            currentShape.currentRotation += 1;
+        }
+    }
+
 
     private void setCheck(boolean value) {
         check = value;
@@ -38,11 +105,11 @@ public class ProgramLogic {
         setSolve(!getSolve());
     }
 
-    public void toSolve() throws InterruptedException {
+   /* public void toSolve() throws InterruptedException {
         placeShapeInBestPosition();
-    }
+    }*/
 
-    public void placeShapeInBestPosition() {
+    /*public void placeShapeInBestPosition() {
         int x = 0;
         int y;
         double score;
@@ -55,7 +122,7 @@ public class ProgramLogic {
             for (int i = 0; i < 11; i++) {
                 shift = new Point(i,0);
                 if (isBump(0, 0)) continue;
-                y = futurePosition();
+                y = futurePosition(matrix);
                 for (Point point1: currentShape[currentRotation]) {
                     matrix[point1.x + shift.x][point1.y + y] = currentColor;
                 }
@@ -74,13 +141,13 @@ public class ProgramLogic {
         shift.x = x;
         shift.y = yOld;
         setCheck(false);
+    }*/
+
+    public double checkScore(Color[][] matrix) {
+        return height(matrix) + lines(matrix) + bumpiness(matrix);
     }
 
-    public double checkScore() {
-        return height() + lines() + bumpiness();
-    }
-
-    public double height() {
+    public double height(Color[][] matrix) {
         int holes = 0;
         int height = 0;
         for (int i = 1; i < 11; i++) {
@@ -99,7 +166,7 @@ public class ProgramLogic {
         return -0.510066 * height + -0.35663 * holes;
     }
 
-    public double lines() {
+    public double lines(Color[][] matrix) {
         int lines = 0;
         for (int j = 19; j > 0 ; j--) {
             boolean flag = true;
@@ -115,7 +182,7 @@ public class ProgramLogic {
         return 0.760666 * lines;
     }
 
-    public double bumpiness() {
+    public double bumpiness(Color[][] matrix) {
         int bumpiness = 0;
         int height1 = 20;
         for (int j = 0; j < 20; j++) {
@@ -147,21 +214,21 @@ public class ProgramLogic {
         return solve;
     }
 
-    public boolean isBump(int x, int y) {
-        for (Point point: currentShape[currentRotation]) {
-            if (matrix[point.x + shift.x + x][point.y + shift.y + y] != programInterface.emptyColor) {
+    public boolean isBump(int x, int y, Color[][] matrix, CurrentShape currentShape) {
+        for (Point point: currentShape.shapeCoordinates[currentShape.currentRotation]) {
+            if (matrix[point.x + currentShape.shift.x + x][point.y + currentShape.shift.y + y] != programInterface.emptyColor) {
                 return true;
             }
         }
         return false;
     }
 
-    public int futurePosition() {
+    public int futurePosition(Color[][] matrix, CurrentShape currentShape) {
         int minY = 2000;
-        for (Point point: currentShape[currentRotation]) {
+        for (Point point: currentShape.shapeCoordinates[currentShape.currentRotation]) {
             int y = 0;
-            for (int j = point.y + shift.y + 1; j < 20; j++) {
-                if (matrix[point.x + shift.x][j] == programInterface.emptyColor) {
+            for (int j = point.y + currentShape.shift.y + 1; j < 20; j++) {
+                if (matrix[point.x +currentShape.shift.x][j] == programInterface.emptyColor) {
                     y++;
                 } else break;
             }
@@ -174,7 +241,8 @@ public class ProgramLogic {
         this.myKeyboardListener = myKeyboardListener;
     }
 
-    public void clearFullRows() {
+    public int clearFullRows(Color[][] matrix) {
+        int amount = 0;
         for (int k = 0; k < 4; k++) {
             for (int j = 19; j > 0; j--) {
                 boolean flag = true;
@@ -185,6 +253,7 @@ public class ProgramLogic {
                     }
                 }
                 if (flag) {
+                    amount++;
                     clearedLines++;
                     for (int i = j; i > 0; i--) {
                         for (int l = 1; l < 11; l++) {
@@ -197,35 +266,35 @@ public class ProgramLogic {
                 }
             }
         }
+        return amount;
     }
 
-    public void shapeMove(int k) {
-        for (Point point: currentShape[currentRotation])
-            if (matrix[shift.x + point.x][shift.y + point.y + 1] != programInterface.emptyColor) return;
-        if (!isBump(k, 0)) {
-            shift.x += k;
+    public void shapeMove(int k, Color[][] matrix, CurrentShape currentShape) {
+        for (Point point: currentShape.shapeCoordinates[currentShape.currentRotation])
+            if (matrix[currentShape.shift.x + point.x][currentShape.shift.y + point.y + 1] != programInterface.emptyColor) return;
+        if (!isBump(k, 0, matrix, currentShape)) {
+            currentShape.shift.x += k;
             programInterface.repaint();
         }
     }
 
-    public void upShapeRotate() {
-        if (currentRotation < 3) currentRotation++;
-        else currentRotation = 0;
-        if (isBump(0, 0)) {
-            if (currentRotation > 0) currentRotation--;
-            else currentRotation = 3;
+    public void upShapeRotate(Color[][] matrix, CurrentShape currentShape) {
+        if (currentShape.currentRotation < 3) currentShape.currentRotation++;
+        else currentShape.currentRotation = 0;
+        if (isBump(0, 0, matrix, currentShape)) {
+            if (currentShape.currentRotation > 0) currentShape.currentRotation--;
+            else currentShape.currentRotation = 3;
             return;
         }
         programInterface.repaint();
     }
 
-    public void downShapeRotate() {
-        if (currentRotation > 0) currentRotation--;
-        else currentRotation = 3;
-
-        if (isBump(0, 0)) {
-            if (currentRotation < 3) currentRotation++;
-            else currentRotation = 0;
+    public void downShapeRotate(Color[][] matrix, CurrentShape currentShape) {
+        if (currentShape.currentRotation > 0) currentShape.currentRotation++;
+        else currentShape.currentRotation = 3;
+        if (isBump(0, 0, matrix, currentShape)) {
+            if (currentShape.currentRotation < 3) currentShape.currentRotation--;
+            else currentShape.currentRotation = 0;
             return;
         }
         programInterface.repaint();
@@ -239,8 +308,8 @@ public class ProgramLogic {
     //Run of the process
     private void launchApplication() {
         Runnable r = ()->{
-            try {
-                while (gameProcess) {
+            while (gameProcess) {
+                /*if (!mySolverSecond) {
                     if (!pause && !solve) {
                         Thread.sleep(1000);
                         if (!gameOver) {
@@ -253,10 +322,8 @@ public class ProgramLogic {
                             Thread.sleep(15);
                         }
                     }
-                    programInterface.repaint();
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                }*/
+                programInterface.repaint();
             }
         };
 
@@ -274,53 +341,51 @@ public class ProgramLogic {
 
     public void setGameOver(boolean value) {
         gameOver = value;
-        if (gameOver) myKeyboardListener.block = true;
+        if (value) myKeyboardListener.block = true;
     }
 
     public boolean getGameOver() {
         return gameOver;
     }
 
-    public boolean isGameOver() {
+    public boolean isGameOver(Color[][] matrix, CurrentShape currentShape) {
         for (int k = 0; k < 4; k++) {
-                if (isBump(0, 0)) {
+                if (isBump(0, 0, matrix, currentShape)) {
                     return true;
                 }
         }
         return false;
     }
 
-    public void newShape() {
+    public CurrentShape newShape(ArrayDeque<Integer> allShapes, Color[][] matrix) {
         setCheck(true);
-        currentRotation = (int) (Math.random() * 4);
-        currentShape = Shapes.shapes[allShapes.peek()];
-        currentColor = Shapes.shapesColors[allShapes.peek()];
+        CurrentShape currentShape = new CurrentShape(allShapes.peek());
+        currentShape.currentRotation = (int) (Math.random() * 4);
         allShapes.remove();
         int numberOfNewShape = (int) (Math.random() * 7);
         allShapes.add(numberOfNewShape);
-        shift = new Point(5, 0);
-        if (isGameOver()) {
+        return currentShape;
+    }
+
+    public void oneTick(Color[][] matrix, CurrentShape currentShape) {
+        if (isBump(0, 1, matrix, currentShape)) {
+            stopShape(matrix, currentShape);
+            return;
+        }
+        currentShape.shift.y++;
+        if (isGameOver(matrix, currentShape)) {
             setGameOver(true);
         } else {
-            clearFullRows();
+            clearFullRows(matrix);
             programInterface.repaint();
         }
     }
 
-    public void oneTick() {
-        if (isBump(0, 1)) {
-            stopShape();
-            return;
+    public void stopShape(Color[][] matrix, CurrentShape currentShape) {
+        for (Point point: currentShape.shapeCoordinates[currentShape.currentRotation]) {
+            matrix[point.x + currentShape.shift.x][point.y + currentShape.shift.y] = currentShape.currentColor;
         }
-        shift.y++;
-        programInterface.repaint();
-    }
-
-    public void stopShape() {
-        for (Point point: currentShape[currentRotation]) {
-            matrix[point.x + shift.x][point.y + shift.y] = currentColor;
-        }
-        newShape();
+        this.currentShape = newShape(allShapes, matrix);
     }
 
     public void setPause(boolean value) {
@@ -344,7 +409,7 @@ public class ProgramLogic {
                 else matrix[i][j] = programInterface.emptyColor;
             }
         }
-        newShape();
+        this.currentShape = newShape(allShapes, matrix);
         programInterface.repaint();
     }
 
