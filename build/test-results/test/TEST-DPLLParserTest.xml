@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="DPLLParserTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2022-05-25T15:47:54" hostname="MacBook-Air-Anna.local" time="0.319">
+  <properties/>
+  <testcase name="minTest_shouldReturnSatisfiable1" classname="DPLLParserTest" time="0.066"/>
+  <testcase name="minTest_shouldReturnSatisfiable2" classname="DPLLParserTest" time="0.005"/>
+  <testcase name="negativeSimpleTests_shouldReturnSatisfiable" classname="DPLLParserTest" time="0.004"/>
+  <testcase name="minTest_shouldReturnSatisfiable" classname="DPLLParserTest" time="0.003"/>
+  <testcase name="minimunSatisfiableTest_shouldReturnSatisfiable" classname="DPLLParserTest" time="0.003"/>
+  <testcase name="satLibPositiveTest_shouldReturnSatisfiable" classname="DPLLParserTest" time="0.054"/>
+  <testcase name="positiveSimpleTests_shouldReturnSatisfiable" classname="DPLLParserTest" time="0.003"/>
+  <testcase name="satLibNegativeTest_shouldReturnSatisfiable" classname="DPLLParserTest" time="0.178"/>
+  <system-out><![CDATA[SAT
+Solution is [1, -4, 3, 5, 6]
+SAT
+Solution is [1, 2, 3]
+SAT
+Solution is [-1]
+SAT
+Solution is [-1, -2]
+SAT
+Solution is [-1, 2, -3, 4, 5, -6, 7, 8, -10, 9, -12, 13, 14, 15, 16, -18, 17, -19, 20, 21, 22, -24, 23, -25, -26, -27, -28, -29, 30, -32, 31, -34, 33, -35, -36, -38, 37, -39, 40, -41, 42, -44, 43, 45, -46, -48, -49, -50, 51, -53, 54, -55, 56, -57, -58, -59, -60, 61, -62, 63, -64, -65, 66, -67, -68, 69, -70, 71, 72, -74, 73, -75]
+SAT
+Solution is [-1, -2]
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
