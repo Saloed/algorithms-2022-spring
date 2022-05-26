@@ -39,21 +39,26 @@ public class ProgramLogic {
 
     public void solverMonteCarlo() {
         score = new double[104];
+
+        for (int i = 0; i < 104; i++) {
+            score[i] = 0;
+        }
         numberOfSuccess = new int[104];
         N = 0;
 
         NewShape newShape = new NewShape(currentShape);
         newShape.currentRotation = 0;
 
-        Color[][] matrixHelp = new Color[12][21];
-        for (int iHelp = 0; iHelp < 12; iHelp++) {
-            for (int jHelp = 0; jHelp < 21; jHelp++) {
-                matrixHelp[iHelp][jHelp] = this.matrix[iHelp][jHelp];
-            }
-        }
 
         for (int k = 0; k < 4; k++) {
             for (int i = 0; i < 11; i++) {
+
+                Color[][] matrixHelp = new Color[12][21];
+                for (int iHelp = 0; iHelp < 12; iHelp++) {
+                    for (int jHelp = 0; jHelp < 21; jHelp++) {
+                        matrixHelp[iHelp][jHelp] = this.matrix[iHelp][jHelp];
+                    }
+                }
 
                 newShape.shift.x = i;
                 if (isBump(0, 0, matrixHelp, newShape)) {
@@ -66,15 +71,15 @@ public class ProgramLogic {
                     matrixHelp[point1.x + newShape.shift.x][point1.y + y] = Color.PINK;
                 }
 
-                if (allShapes.size() < 10) System.out.println("1111");
                 algorithmMonteCarlo(matrixHelp, allShapes, newShape.shift.x * 10 + newShape.currentRotation);
 
-                for (int i1 = 1; i < 11; i++) {
+                /*for (int i1 = 1; i < 11; i++) {
                     for (int j1 = 0; j1 < 20; j1++) {
                         if (matrixHelp[i1][j1] == Color.PINK) matrixHelp[i1][j1] = programInterface.emptyColor;
                     }
-                }
+                }*/
             }
+
             if (k != 3) newShape.currentRotation++;
         }
 
@@ -86,14 +91,16 @@ public class ProgramLogic {
 
         for (int i = 0; i < 104; i++) {
             if (i % 10 < 4 && numberOfSuccess[i] > 0) {
-                //double currScore = score[i] / numberOfSuccess[i];
+                //double currScore = score[i];
 
-                double currScore = (double) numberOfSuccess[i] / numberOfTries;
-                //double currScore = (double) (numberOfSuccess[i] / numberOfTries) + c * Math.sqrt(Math.log(N) / numberOfTries);
+                double currScore = score[i] / numberOfSuccess[i];
+                //double currScore = (double) numberOfSuccess[i] / numberOfTries;
+                //double currScore = (double) (numberOfSuccess[i] / N) + c * Math.sqrt(Math.log(numberOfTries) / N);
                 //double currScore = score[i] * (1 - (double) numberOfSuccess[i] / numberOfTries);
 
                 //System.out.println(currScore);
 
+                //int currScore = numberOfSuccess[i];
                 if (currScore > bestScore) {
                     bestScore = currScore;
                     bestInfo = i;
@@ -103,6 +110,8 @@ public class ProgramLogic {
         }
         //System.out.println(bestScore * numberOfSuccess[bestInfo] + "   " + bestInfo);
 
+        //System.out.println(Arrays.toString(numberOfSuccess) + "\n" + bestInfo);
+        //System.out.println(Arrays.toString(score));
         if (bestScore > -1e9) {
             currentShape.currentRotation = bestInfo % 10;
             currentShape.shift.x = bestInfo / 10;
@@ -131,11 +140,12 @@ public class ProgramLogic {
 
                 if (i == numberOfGeneratedShapes - 1) {
                     double currScore = checkScore(matrixHelp);
+                    //if (currScore > score[index]) score[index] = currScore;
                     score[index] += currScore;
                     numberOfSuccess[index]++;
                 }
 
-                clearFullRows(matrixHelp);
+                clearFullRows(matrixHelp, false);
             }
 
             for (int i = 1; i < 11; i++) {
@@ -360,7 +370,7 @@ public class ProgramLogic {
         this.myKeyboardListener = myKeyboardListener;
     }
 
-    public int clearFullRows(Color[][] matrix) {
+    public int clearFullRows(Color[][] matrix, boolean toAdd) {
         int amount = 0;
         for (int k = 0; k < 4; k++) {
             for (int j = 19; j > 0; j--) {
@@ -372,8 +382,10 @@ public class ProgramLogic {
                     }
                 }
                 if (flag) {
-                    amount++;
-                    clearedLines++;
+                    if (toAdd) {
+                        amount++;
+                        clearedLines++;
+                    }
                     for (int i = j; i > 0; i--) {
                         for (int l = 1; l < 11; l++) {
                             matrix[l][i] = matrix[l][i - 1];
@@ -445,7 +457,7 @@ public class ProgramLogic {
                             }
 
                             oneTick(matrix, currentShape);
-                            Thread.sleep(2);
+                            //Thread.sleep(2);
                         }
                     }
 /*
@@ -541,7 +553,7 @@ public class ProgramLogic {
         if (isGameOver(matrix, this.currentShape)) {
             setGameOver(true);
         } else {
-            clearFullRows(matrix);
+            clearFullRows(matrix, true);
         }
     }
 
