@@ -28,6 +28,8 @@ object Colors {
     val CURRENT = Color(0xFFFF6347)
     val WORMHOLE = Color(0xFF8A2BE2)
     val LAST_WORMHOLE = Color(0xFF4B0082)
+
+    val UNKNOWN = Color(0x558A2BE2)
 }
 
 
@@ -52,7 +54,6 @@ fun AppScreen() {
                     if (mapsTotal != 0 && isMapInited) {
                         for (currentMapIndex in ViewModel.allMaps.indices) {
                             Text("Labyrinth $currentMapIndex")
-                            if (currentMapIndex == 1) println("MAP 1 IS SHOWN")
                             for (y in ViewModel.allMaps[currentMapIndex].indices) {
                                 Row {
                                     for (x in ViewModel.allMaps[currentMapIndex][y].indices) {
@@ -90,6 +91,7 @@ fun Cell(currentMapIndex: Int, y: Int, x: Int) {
         "S" -> Colors.START
         " " -> Color.White
         "*" -> Colors.PASSED
+        "" -> Colors.UNKNOWN
         else -> Colors.WORMHOLE
     }
     if (currPos?.x == x-1 && currPos?.y == y-1) color = Colors.CURRENT

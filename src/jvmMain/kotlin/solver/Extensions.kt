@@ -1,5 +1,6 @@
 package solver
 
+import core.Direction
 import core.Location
 import kotlin.math.sqrt
 
@@ -8,3 +9,5 @@ operator fun Location.plus(other: Location) = Location(this.x + other.x, this.y 
 operator fun Location.minus(other: Location) = Location(this.x - other.x, this.y - other.y)
 fun Location.distance(other: Location): Int =
     sqrt((this.x - other.x) * (this.x - other.x) + (this.y - other.y) * (this.y - other.y).toDouble()).toInt()
+
+val directionSet = setOf(Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST)

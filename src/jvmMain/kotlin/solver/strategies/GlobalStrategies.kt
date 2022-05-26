@@ -1,5 +1,11 @@
 package solver.strategies
 
-//class  CheckAllWormholes: GlobalStrategy() {
-//
-//}
+import solver.PlayerMapFactory
+
+
+class DomainExpansion(gameMap: PlayerMapFactory) : GlobalStrategy(gameMap) {
+
+    var currentStrategy: Strategy? = null
+
+
+}

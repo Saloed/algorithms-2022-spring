@@ -1,17 +1,14 @@
 package graphics
 
-import solver.HumanV2
+import solver.HumanAI
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import core.*
 import lab.Controller
 import lab.Labyrinth
 import samples.BrainDead
-import samples.Human
-import solver.minus
 import solver.plus
 import java.lang.Thread.sleep
-import java.util.Locale
 import kotlin.concurrent.thread
 
 
@@ -128,7 +125,7 @@ object ViewModel {
         if (!isRunning.value) {
             thread {
                 val playerRun = object : AbstractPlayerRun() {
-                    override fun createPlayer() = HumanV2()
+                    override fun createPlayer() = HumanAI()
                 }
                 playerRun.doTestLab(pathToLabyrinth)
                 isRunning.value = false
@@ -158,6 +155,7 @@ abstract class AbstractPlayerRun {
         else {
             println("You lose!")
         }
+
 //        assertEquals(controller.playerPath.toString(), expectedResult.exitReached, actualResult.exitReached)
 //        if (expectedResult.exitReached && actualResult.exitReached && expectedResult.moves >= 0) {
 //            assertEquals(controller.playerPath.toString(), expectedResult.moves, actualResult.moves)
