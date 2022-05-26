@@ -57,6 +57,11 @@ public class MyKeyboardListener implements KeyListener {
         if (keyCode == KeyEvent.VK_B) {
             programLogic.mySolverSecond = true;
         }
+
+
+        if (keyCode == KeyEvent.VK_M) {
+            programLogic.mySolverMonteCarlo = !programLogic.mySolverMonteCarlo;
+        }
     }
 
     @Override
