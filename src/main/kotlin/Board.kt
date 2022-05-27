@@ -100,7 +100,5 @@ class Board(private val numbers: Array<IntArray>) {
         return res
     }
 
-    override fun hashCode(): Int {
-        return numbers.contentDeepHashCode()
-    }
+    override fun hashCode(): Int = numbers.contentDeepHashCode()
 }

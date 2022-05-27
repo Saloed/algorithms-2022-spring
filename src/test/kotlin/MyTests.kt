@@ -58,10 +58,6 @@ class MyTests {
         val solver = Solver(board)
         val (lastState, winMovies) = solver.solve()
 
-//        println("lastState: $lastState")
-//        println("lastState metric: ${lastState.metric()}")
-//        println("winMovies: $winMovies")
-
         assertEquals(needPosition.toString(), lastState.toString(), "isSolvable")
         println("moves: ${winMovies.size}")
     }

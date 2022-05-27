@@ -58,32 +58,24 @@ class Solver(private val initial: Board) {
 
     }
 
-//    private fun containsInPath(node: Node, board: Board): Boolean {
-//        var nowNode: Node? = node
-//        while (true) {
-//            if ((nowNode?.board ?: return false) == board) return true
-//            nowNode = nowNode.prevNode
-//        }
-//    }
+    /*
+    private fun containsInPath(node: Node, board: Board): Boolean {
+        var nowNode: Node? = node
+        while (true) {
+            if ((nowNode?.board ?: return false) == board) return true
+            nowNode = nowNode.prevNode
+        }
+    }
 
-//    private fun metricWithDeep(node: Node): Int {
-//        var nowNode: Node? = node
-//        var count = 0
-//        val metric = node.board.metric()
-//        while (true) {
-//            count++
-//            nowNode = nowNode?.prevNode ?: return count + metric
-//        }
-//    }
+    private fun saveResults(node: Node) {
+        var nowNode: Node? = node
+        while (true) {
+            winTrace.add(nowNode?.board ?: return winTrace.reverse())
+            nowNode = nowNode.prevNode
+        }
+    }
 
-//    private fun saveResults(node: Node) {
-//        var nowNode: Node? = node
-//        while (true) {
-//            winTrace.add(nowNode?.board ?: return winTrace.reverse())
-//            nowNode = nowNode.prevNode
-//        }
-//    }
-
-//    fun countMoves(): Int = winTrace.size - 1
-//    fun solution(): List<Int> = solve().second
+    fun countMoves(): Int = winTrace.size - 1
+    fun solution(): List<Int> = solve().second
+    */
 }
