@@ -33,7 +33,6 @@ fun findClosestOrGoal(
             minSteps = minOf((knownLocations[direction + newLocation] ?: Int.MAX_VALUE), minSteps)
         }
         knownLocations[newLocation] = minSteps + 1
-        println("$newLocation ${newLocation in currentMap.toDiscover} ${newLocation in currentMap.toDiscover && goal == null}")
         if (newLocation in currentMap.toDiscover && goal == null || newLocation == goal) {
             isRouteFound = true
             endLocation = newLocation
@@ -41,13 +40,10 @@ fun findClosestOrGoal(
             expandUntilGoal(newLocation)
         }
     }
+    println(start)
     expandUntilGoal(start)
-    println("   goal= $endLocation")
-    println("   currentLoc= ${currentMap.currentLocation}")
-    println("   currentLoc= ${start}")
     val route = ArrayDeque<WalkMove>()
     reconstructFromMap(knownLocations, start, endLocation, route)
-    println(route.map { it.direction })
     return route
 
 }

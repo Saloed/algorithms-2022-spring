@@ -31,7 +31,7 @@ class PlayerMapFactory(val actualStartLocation: Location) {
 
     }
 
-    private fun updateGraphics() {
+    fun updateGraphics() {
         currentMap.let {
             ViewModel.updatePlayerMap(
                 index = currentMapIndex,

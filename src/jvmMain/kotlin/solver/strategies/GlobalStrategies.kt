@@ -1,8 +1,11 @@
 package solver.strategies
 
 import core.*
+import graphics.ViewModel
 import solver.PlayerMap
 import solver.PlayerMapFactory
+import solver.minus
+import solver.plus
 
 
 class FindAllWormholes(private val mapFactory: PlayerMapFactory) : AbstractGlobalStrategy(mapFactory) {
@@ -12,7 +15,7 @@ class FindAllWormholes(private val mapFactory: PlayerMapFactory) : AbstractGloba
     }
 
     private var checkRouteToStart: ArrayDeque<WalkMove>? = null
-//    var allowCheckLocations = false
+
     private var checkRouteFromStart: ArrayDeque<WalkMove> = ArrayDeque()
 
     override fun getNextMove(): WalkMove =
@@ -33,23 +36,40 @@ class FindAllWormholes(private val mapFactory: PlayerMapFactory) : AbstractGloba
         }
 
     private fun PlayerMap.recalculateLocationsAndMerge(room: Room) {
-//        if (mapFactory.playerMaps[0] == this)
+        when (room) {
+            Entrance -> {
+                val mapToMerge = this
+                val startMap = mapFactory.playerMaps[0]
+                val offset = mapFactory.lastDirection + mapToMerge.currentLocation - mapFactory.actualStartLocation //TODO(Right calculations)
+                startMap.knownLocations += mapToMerge.knownLocations.mapKeys { it.key - offset }
+                startMap.toDiscover += mapToMerge.toDiscover.map { it - offset }.filter { it !in knownLocations }
+
+                if (startMap.treasure == null) startMap.treasure = mapToMerge.treasure?.minus(offset)
+                startMap.wormholes += mapToMerge.wormholes.mapKeys { it.key - offset }
+                startMap.currentLocation = mapToMerge.currentLocation - offset
+                mapFactory.currentMapIndex = 0
+                mapFactory.playerMaps.removeLast()
+                ViewModel.removeLastMap()
+                mapFactory.updateGraphics()
+                subStrategy = RyoikiTenkai(mapFactory.currentMap)
+            }
+            else -> {}
+        }
     }
 
 
     override fun setResults(result: MoveResult) {
-        println(result.successful)
         if (result.successful) {
-            if (mapFactory.currentMapIndex != 0) mapFactory.currentMap.recalculateLocationsAndMerge(result.room)
             when (result.room) {
                 Entrance -> if (mapFactory.currentMapIndex != 0) {
+                    mapFactory.currentMap.recalculateLocationsAndMerge(result.room)
                     when (subStrategy) {
                         is CheckLocation -> subStrategy = RyoikiTenkai(mapFactory.currentMap)
                         is RyoikiTenkai -> {} // DO nothing
                     }
                 }
-                Exit -> { }
-                is WithContent -> {  }
+                Exit -> {}
+                is WithContent -> {}
                 is Wormhole -> {
                     if (checkRouteToStart == null) {
                         checkRouteToStart = findClosestOrGoal(
@@ -64,15 +84,15 @@ class FindAllWormholes(private val mapFactory: PlayerMapFactory) : AbstractGloba
                 else -> {}
             }
         } else {
+            println("starting calculations of goal")
             when (subStrategy) {
                 is CheckLocation -> subStrategy =
                     CheckLocation(findClosestOrGoal(mapFactory.currentMap, mapFactory.currentMap.spawnLocation))
+
                 is RyoikiTenkai -> {}
             }
         }
     }
-
-
 }
 
 

@@ -8,13 +8,13 @@ import core.Wormhole
 class PlayerMap(val spawnLocation: Location, isPrimary: Boolean) {
 
     var discoverCellsToVisualize = mutableSetOf<Location>()
-    var roomToVisualize: Pair<Location, Room>
+    var roomToVisualize: MutableMap<Location, Room>
 
     var currentLocation = spawnLocation
 
     val knownLocations = mutableMapOf<Location, Room>()
     val wormholes = mutableMapOf<Location, Wormhole>()
-    val toDiscover = mutableSetOf<Location>()
+    var toDiscover = mutableSetOf<Location>()
     var entrance: Location? = null
     var exit: Location? = null
 
@@ -25,11 +25,11 @@ class PlayerMap(val spawnLocation: Location, isPrimary: Boolean) {
         if (isPrimary) {
             knownLocations[spawnLocation] = Entrance
             entrance = spawnLocation
-            roomToVisualize= Pair(spawnLocation, Entrance)
+            roomToVisualize = mutableMapOf(spawnLocation to Entrance)
         } else {
-            knownLocations[spawnLocation] = Wormhole(0) // todo(Add actual wormhole id)
-            wormholes[spawnLocation] = Wormhole(0) // todo(Add actual wormhole id)
-            roomToVisualize = Pair(currentLocation, Wormhole(0)) // todo(Add actual wormhole id)
+            knownLocations[spawnLocation] = Wormhole(-1) // todo(Add actual wormhole id)
+            wormholes[spawnLocation] = Wormhole(-1) // todo(Add actual wormhole id)
+            roomToVisualize = mutableMapOf(currentLocation to Wormhole(-1)) // todo(Add actual wormhole id)
         }
         calcToDiscover()
     }
@@ -47,7 +47,7 @@ class PlayerMap(val spawnLocation: Location, isPrimary: Boolean) {
 
     // todo(revisit for changes + toDiscover)
     fun setLastMoveResults(res: MoveResult, lastMove:Direction) {
-        roomToVisualize = (lastMove + currentLocation to res.room)
+        roomToVisualize[lastMove + currentLocation] = res.room
         if (lastMove + currentLocation in toDiscover) toDiscover.remove(lastMove + currentLocation)
         if (res.successful) {
             currentLocation = lastMove + currentLocation

@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import core.*
 import lab.Controller
 import lab.Labyrinth
-import samples.BrainDead
 import solver.plus
 import java.lang.Thread.sleep
 import kotlin.concurrent.thread
@@ -21,15 +20,17 @@ object ViewModel {
     fun updatePlayerMap(
         index: Int,
         toDiscover: Set<Location> = setOf(),
-        current: Pair<Location, Room>
+        current: MutableMap<Location, Room>
     ) {
-        gameState.apply {
-            val ch = getCharFromRoom(current.second)
-            if (index + 1 > allMaps.size - 1) addEmptyMap()
-            val offset = if (index == 0) Location(1, 1) else allMapsOffsets[index + 1]!!
-            allMaps[index + 1][(current.first + offset).y][(current.first + offset).x].value = ch.toString()
-            toDiscover.forEach {
-                allMaps[index + 1][it.y + offset.y][it.x + offset.x].value = "*"
+        current.forEach { (location, room) ->
+            gameState.apply {
+                val ch = getCharFromRoom(room)
+                if (index + 1 > allMaps.size - 1) addEmptyMap()
+                val offset = if (index == 0) Location(1, 1) else allMapsOffsets[index + 1]!!
+                allMaps[index + 1][(location + offset).y][(location + offset).x].value = ch.toString()
+                toDiscover.forEach {
+                    allMaps[index + 1][it.y + offset.y][it.x + offset.x].value = "*"
+                }
             }
         }
     }
@@ -40,6 +41,12 @@ object ViewModel {
             currPos = location
             stateOfCurrPose.value = location
             prevPos = currPos
+        }
+    }
+    fun removeLastMap() {
+        gameState.apply {
+            mapsTotal.value--
+            allMaps.removeLast()
         }
     }
 
