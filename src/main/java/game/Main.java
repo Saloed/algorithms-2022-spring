@@ -59,10 +59,14 @@ public class Main extends GameApplication {
             @Override
             protected void onActionBegin() {
                 if (GAME_INIT) {
-                    curEntity = findWolfByCoordinate((int) input.getMouseYWorld() / 50 - 1, (int) input.getMouseXWorld() / 50 - 1);
+                    curEntity = findWolfByCoordinate(
+                            (int) input.getMouseYWorld() / 50 - 1,
+                            (int) input.getMouseXWorld() / 50 - 1);
                     if (curEntity != null) {
                         if (curEntity.getX() == (int) input.getMouseXWorld() / 50 - 1 && curEntity.getY() == (int) input.getMouseYWorld() / 50 - 1) {
-                            lastCoordinate = new Pair<>((int) getGameWorld().getSingleton(curEntity).getY(), (int) getGameWorld().getSingleton(curEntity).getX());
+                            lastCoordinate = new Pair<>(
+                                    (int) getGameWorld().getSingleton(curEntity).getY(),
+                                    (int) getGameWorld().getSingleton(curEntity).getX());
                             getGameWorld().getSingleton(curEntity).setAnchoredPosition(getInput().getMousePositionWorld());
                             ifCatch = true;
                         }
@@ -108,9 +112,13 @@ public class Main extends GameApplication {
             if ((y >= 0 && x >= 0 && y <= 7 && x <= 7)) {
                 if (array[y][x] == 0) {
                     if (x < wolf.getX())
-                        getGameWorld().getSingleton(wolf).setAnchoredPosition(lastCoordinates.getSecond() - 50, lastCoordinates.getFirst() + 50);
+                        getGameWorld()
+                                .getSingleton(wolf)
+                                .setAnchoredPosition(lastCoordinates.getSecond() - 50, lastCoordinates.getFirst() + 50);
                     if (x > wolf.getX())
-                        getGameWorld().getSingleton(wolf).setAnchoredPosition(lastCoordinates.getSecond() + 50, lastCoordinates.getFirst() + 50);
+                        getGameWorld()
+                                .getSingleton(wolf)
+                                .setAnchoredPosition(lastCoordinates.getSecond() + 50, lastCoordinates.getFirst() + 50);
 
                     wolf.setCoordinate(new Pair<>(y, x));
                     array[y][x] = 0;
@@ -185,7 +193,7 @@ public class Main extends GameApplication {
         Map<String, Runnable> setUpPlayer = new LinkedHashMap<>();
         Map<String, Runnable> setUpDifficulty = new LinkedHashMap<>();
 
-        setUpPlayer.put("Woolf", () -> PLAYER_TYPE = 2);
+        setUpPlayer.put("Wolf", () -> PLAYER_TYPE = 2);
         setUpPlayer.put("Sheep", () -> PLAYER_TYPE = 1);
         setUpDifficulty.put("Easy", () -> DIFFICULTY = 1);
         setUpDifficulty.put("Medium", () -> DIFFICULTY = 1.5);
@@ -206,13 +214,14 @@ public class Main extends GameApplication {
             dialogType.add(cbDialogs2.getSelectionModel().getSelectedItem());
 
             for (String action : dialogType) {
-                if (setUpPlayer.containsKey(action))
+                if (setUpPlayer.containsKey(action)) {
                     setUpPlayer.get(action).run();
-                else if (setUpDifficulty.containsKey(action))
+                } else if (setUpDifficulty.containsKey(action))
                     setUpDifficulty.get(action).run();
                 GAME_INIT = true;
-                resetGame();
             }
+            resetGame();
+            if (Objects.equals(PLAYER_TYPE, 2)) algorithm.minMax(1, 0, -500, +500);
         });
 
         VBox vbox = new VBox(10);

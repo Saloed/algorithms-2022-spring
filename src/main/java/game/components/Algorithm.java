@@ -9,8 +9,12 @@ import static game.Type.*;
 import static game.components.GlobalVars.*;
 
 public class Algorithm {
-    int count = 0;
+
+    int MAX_VALUE = 255;
+    int MIN_VALUE = 0;
+
     public AiMove wolfMoveComponent = new AiMove();
+
     final Pair<Integer, Integer>[] moves = new Pair[]{
             new Pair<>(+1, +1),
             new Pair<>(+1, -1),
@@ -19,9 +23,8 @@ public class Algorithm {
     };
     Type[] wolfs = new Type[]{WOLF1, WOLF2, WOLF3, WOLF4};
 
-    Stack<Pair<Integer, Integer>> stack = new Stack<>();
-
     public int minMax(int entity, int recursiveLvl, int alpha, int beta) {
+
         if (recursiveLvl == 0) prepareField();
         int test;
 
@@ -66,24 +69,21 @@ public class Algorithm {
         }
 
         if (recursiveLvl == 0) {
-            System.out.println(count);
-            count = 0;
             if (entity == 2) {
                 wolfs[bestMove / 2].setCoordinate(wolfs[bestMove / 2].getCoordinate().addTo(moves[bestMove % 2]));
                 prepareField();
-                wolfMoveComponent.moveWolf(wolfs[bestMove / 2]);
+                wolfMoveComponent.moveEntity(wolfs[bestMove / 2]);
 
             } else {
                 SHEEP.setCoordinate(SHEEP.getCoordinate().addTo(moves[bestMove % 4]));
                 prepareField();
-                wolfMoveComponent.moveWolf(SHEEP);
+                wolfMoveComponent.moveEntity(SHEEP);
             }
         }
         return MinMax;
     }
 
     public void entityMove(int curEntity, int y, int x) {
-        count++;
         if (curEntity == 0) {
             array[SHEEP.getY()][SHEEP.getX()] = 0;
             array[SHEEP.getY() + y][SHEEP.getX() + x] = 1;
@@ -97,7 +97,7 @@ public class Algorithm {
 
     public void prepareField() {
 
-        for (int i = 0; i < 8; i++) System.arraycopy(arr[i], 0, array[i], 0, 8);
+        array = new int[8][8];
 
         array[SHEEP.getY()][SHEEP.getX()] = 1;
 
@@ -106,15 +106,14 @@ public class Algorithm {
 
 
         public int getEvaluation() {
-
+            ArrayDeque<Pair<Integer, Integer>> deque = new ArrayDeque<>();
             if (SHEEP.getY() == 0) return 0;
             int minCycle = 200;
             boolean minActive = false;
-            stack.clear();
-            stack.push(SHEEP.getCoordinate());
+            deque.push(SHEEP.getCoordinate());
 
-            while (!stack.isEmpty()) {
-                Pair<Integer, Integer> currentPosition = stack.pop();
+            while (!deque.isEmpty()) {
+                Pair<Integer, Integer> currentPosition = deque.pop();
                 for (int i = 0; i < 4; i++) {
                     if (canMove(currentPosition.getFirst() + moves[i].getFirst(), currentPosition.getSecond() + moves[i].getSecond())) {
                         Pair<Integer, Integer> newPosition = currentPosition.addTo(moves[i]);
@@ -125,9 +124,9 @@ public class Algorithm {
                         }
                         if (minActive) {
                             if (array[newPosition.getFirst()][newPosition.getSecond()] < minCycle)
-                                stack.push(newPosition);
+                                deque.push(newPosition);
                         } else
-                            stack.push(newPosition);
+                            deque.push(newPosition);
                     }
                 }
             }
