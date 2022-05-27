@@ -1,18 +1,13 @@
 import java.util.PriorityQueue
 
 class Solver(private val initial: Board) {
-    private val winTrace: MutableList<Board> = mutableListOf()
 
     private data class Node(
-        val prevNode: Node?,
-        val board: Board
+        val board: Board,
+        val movies: MutableList<Int>
     )
 
-    init {
-        solve()
-    }
-
-    private fun solve() {
+    fun solve(): Pair<Board, List<Int>> {
         val unsolvablePosition = Board(
             arrayOf(
                 intArrayOf(1, 2, 3, 4),
@@ -21,62 +16,74 @@ class Solver(private val initial: Board) {
                 intArrayOf(13, 15, 14, 0)
             )
         )
-        if (initial.isNeedPosition() || initial == unsolvablePosition) saveResults(Node(null, initial))
-        else {
-            val priorityQueue = PriorityQueue<Node>(compareBy { it.board.metric() })
+        if (initial.isNeedPosition() || initial == unsolvablePosition) return Pair(initial, listOf())
 
-            val setWithAllBoards = mutableSetOf<Board>()
-            val setWithPriorityQueue = mutableSetOf<Board>()
+        val priorityQueue = PriorityQueue<Node>(compareBy { it.board.metric() })
+        val setWithAllBoards = mutableSetOf<Board>()
+        val setWithPriorityQueue = mutableSetOf<Board>()
 
-            priorityQueue.add(Node(null, initial))
+        priorityQueue.add(Node(initial, mutableListOf()))
 
-            while (true) {
-                val thisNode = priorityQueue.poll()
-                setWithAllBoards.add(thisNode.board)
-                priorityQueue.remove(thisNode)
+        while (true) {
+            val thisNode = priorityQueue.poll()
+            setWithAllBoards.add(thisNode.board)
+            priorityQueue.remove(thisNode)
 
-                for (thisBoard in thisNode.board.neighborsWithMove()) {
-                    if (thisBoard in setWithAllBoards || thisBoard in setWithPriorityQueue) continue
+            for (moveCoordinates in thisNode.board.neighborsWithOutMove()) {
+                val newBoardArray = thisNode.board.numbersCopy()
+                var newBoard = Board(newBoardArray)
+                val movies = thisNode.movies.toMutableList()
+                movies.add(newBoardArray[moveCoordinates.first][moveCoordinates.second])
 
-                    if (thisBoard.isNeedPosition() || thisBoard == unsolvablePosition) {
-                        saveResults(Node(thisNode, thisBoard))
-                        return
-                    }
+                newBoardArray[newBoard.zeroCoordinates().first][newBoard.zeroCoordinates().second] =
+                    newBoardArray[moveCoordinates.first][moveCoordinates.second]
+                        .also {
+                            newBoardArray[moveCoordinates.first][moveCoordinates.second] =
+                                newBoardArray[newBoard.zeroCoordinates().first][newBoard.zeroCoordinates().second]
+                        }
+                newBoard = Board(newBoardArray)
 
-                    priorityQueue.add(Node(thisNode, thisBoard))
-                    setWithPriorityQueue.add(thisBoard)
-                }
+                if (newBoard in setWithAllBoards || newBoard in setWithPriorityQueue) continue
 
+                val newNode = Node(newBoard, movies)
+
+                if (newBoard.isNeedPosition() || newBoard == unsolvablePosition)
+                    return Pair(newNode.board, newNode.movies)
+
+                priorityQueue.add(newNode)
+                setWithPriorityQueue.add(newBoard)
             }
         }
+
+
     }
 
-    private fun containsInPath(node: Node, board: Board): Boolean {
-        var nowNode: Node? = node
-        while (true) {
-            if ((nowNode?.board ?: return false) == board) return true
-            nowNode = nowNode.prevNode
-        }
-    }
+//    private fun containsInPath(node: Node, board: Board): Boolean {
+//        var nowNode: Node? = node
+//        while (true) {
+//            if ((nowNode?.board ?: return false) == board) return true
+//            nowNode = nowNode.prevNode
+//        }
+//    }
 
-    private fun metricWithDeep(node: Node): Int {
-        var nowNode: Node? = node
-        var count = 0
-        val metric = node.board.metric()
-        while (true) {
-            count++
-            nowNode = nowNode?.prevNode ?: return count + metric
-        }
-    }
+//    private fun metricWithDeep(node: Node): Int {
+//        var nowNode: Node? = node
+//        var count = 0
+//        val metric = node.board.metric()
+//        while (true) {
+//            count++
+//            nowNode = nowNode?.prevNode ?: return count + metric
+//        }
+//    }
 
-    private fun saveResults(node: Node) {
-        var nowNode: Node? = node
-        while (true) {
-            winTrace.add(nowNode?.board ?: return winTrace.reverse())
-            nowNode = nowNode.prevNode
-        }
-    }
+//    private fun saveResults(node: Node) {
+//        var nowNode: Node? = node
+//        while (true) {
+//            winTrace.add(nowNode?.board ?: return winTrace.reverse())
+//            nowNode = nowNode.prevNode
+//        }
+//    }
 
-    fun countMoves(): Int = winTrace.size - 1
-    fun solution(): List<Board> = winTrace
+//    fun countMoves(): Int = winTrace.size - 1
+//    fun solution(): List<Int> = solve().second
 }
