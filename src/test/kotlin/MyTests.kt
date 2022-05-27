@@ -31,14 +31,17 @@ class MyTests {
         val board = Board(inputNumbersArray)
 //        println(board)
         val solver = Solver(board)
+        val (lastState, winMovies) = solver.solve()
 
         val resultPosition =
-            if (solver.solution().last() == needPosition) needPosition
-            else if (solver.solution().last() == unsolvablePosition) unsolvablePosition
-            else null
+            when (lastState) {
+                needPosition -> needPosition
+                unsolvablePosition -> unsolvablePosition
+                else -> null
+            }
 
-        assertEquals(resultPosition.toString(), solver.solution().last().toString(), "")
-        println("moves: ${solver.countMoves()}")
+        assertEquals(resultPosition.toString(), lastState.toString(), "")
+        println("moves: ${winMovies.size}")
 
     }
 
@@ -53,9 +56,14 @@ class MyTests {
 
         val board = Board(inputNumbers)
         val solver = Solver(board)
+        val (lastState, winMovies) = solver.solve()
 
-        assertEquals(needPosition.toString(), solver.solution().last().toString(), "isSolvable")
-        println("moves: ${solver.countMoves()}")
+//        println("lastState: $lastState")
+//        println("lastState metric: ${lastState.metric()}")
+//        println("winMovies: $winMovies")
+
+        assertEquals(needPosition.toString(), lastState.toString(), "isSolvable")
+        println("moves: ${winMovies.size}")
     }
 
     @Test
@@ -69,8 +77,43 @@ class MyTests {
 
         val board = Board(numbersArray)
         val solver = Solver(board)
+        val (lastState, winMovies) = solver.solve()
 
-        assertEquals(unsolvablePosition.toString(), solver.solution().last().toString(), "isNotSolvable")
-        println("moves: ${solver.countMoves()}")
+        assertEquals(unsolvablePosition.toString(), lastState.toString(), "isNotSolvable")
+        println("moves: ${winMovies.size}")
+    }
+
+    @Test
+    fun testLong2() {
+        val numbersArray: Array<IntArray> = arrayOf(
+            intArrayOf(6, 12, 8, 13),
+            intArrayOf(10, 9, 5, 3),
+            intArrayOf(4, 15, 2, 0),
+            intArrayOf(1, 7, 14, 11)
+        )
+
+        val board = Board(numbersArray)
+        val solver = Solver(board)
+        val (lastState, winMovies) = solver.solve()
+
+        assertEquals(unsolvablePosition.toString(), lastState.toString(), "isNotSolvable")
+        println("moves: ${winMovies.size}")
+    }
+
+    @Test
+    fun testLong3() {
+        val numbersArray: Array<IntArray> = arrayOf(
+            intArrayOf(11, 9, 12, 14),
+            intArrayOf(0, 10, 7, 13),
+            intArrayOf(2, 5, 8, 4),
+            intArrayOf(15, 1, 3, 6)
+        )
+
+        val board = Board(numbersArray)
+        val solver = Solver(board)
+        val (lastState, winMovies) = solver.solve()
+
+        assertEquals(unsolvablePosition.toString(), lastState.toString(), "isNotSolvable")
+        println("moves: ${winMovies.size}")
     }
 }
