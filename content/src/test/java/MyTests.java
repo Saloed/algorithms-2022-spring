@@ -1,4 +1,3 @@
-/*
 import java.awt.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,34 +33,34 @@ public class MyTests {
 
     @org.junit.jupiter.api.Test
     void moveLeftTest() {
-        programLogic.shift = new Point(5, 0);
-        programLogic.currentShape = Shapes.shapes[0];
-        programLogic.currentRotation = 1;
-        programLogic.shapeMove(-1);
-        for (Point point: programLogic.currentShape[programLogic.currentRotation]) {
-            assertEquals(5, point.x + programLogic.shift.x);
+        programLogic.currentShape.setShift(5, 0);
+        programLogic.currentShape.setShapeCoordinates(Shapes.shapes[0]);
+        programLogic.currentShape.setCurrentRotation(1);
+        programLogic.shapeMove(-1, programLogic.matrix, programLogic.currentShape);
+        for (Point point: programLogic.currentShape.getShapeCoordinates()[programLogic.currentShape.getCurrentRotation()]) {
+            assertEquals(5, point.x + programLogic.currentShape.getShift().x);
         }
     }
 
     @org.junit.jupiter.api.Test
     void moveRightTest() {
-        programLogic.shift = new Point(5, 0);
-        programLogic.currentShape = Shapes.shapes[0];
-        programLogic.currentRotation = 1;
-        programLogic.shapeMove(1);
-        for (Point point: programLogic.currentShape[programLogic.currentRotation]) {
-            assertEquals(7, point.x + programLogic.shift.x);
+        programLogic.currentShape.setShift(5, 0);
+        programLogic.currentShape.setShapeCoordinates(Shapes.shapes[0]);
+        programLogic.currentShape.setCurrentRotation(1);
+        programLogic.shapeMove(1, programLogic.matrix, programLogic.currentShape);
+        for (Point point: programLogic.currentShape.getShapeCoordinates()[programLogic.currentShape.getCurrentRotation()]) {
+            assertEquals(7, point.x + programLogic.currentShape.getShift().x);
         }
     }
 
     @org.junit.jupiter.api.Test
     void oneTickTest() {
-        programLogic.shift = new Point(5, 0);
-        programLogic.currentShape = Shapes.shapes[0];
-        programLogic.currentRotation = 0;
-        programLogic.oneTick();
-        for (Point point: programLogic.currentShape[programLogic.currentRotation]) {
-            assertEquals(2, point.y + programLogic.shift.y);
+        programLogic.currentShape.setShift(5, 0);
+        programLogic.currentShape.setShapeCoordinates(Shapes.shapes[0]);
+        programLogic.currentShape.setCurrentRotation(0);
+        programLogic.oneTick(programLogic.matrix, programLogic.currentShape);
+        for (Point point: programLogic.currentShape.getShapeCoordinates()[programLogic.currentShape.getCurrentRotation()]) {
+            assertEquals(2, point.y + programLogic.currentShape.getShift().y);
         }
     }
 
@@ -70,7 +69,7 @@ public class MyTests {
         for (int i = 1; i < 11; i++) {
             programLogic.matrix[i][19] = new Color(71, 156, 48);
         }
-        programLogic.clearFullRows();
+        programLogic.clearFullRows(programLogic.matrix, false);
         for (int i = 1; i < 11; i++) {
             assertEquals(programInterface.emptyColor, programLogic.matrix[i][19]);
         }
@@ -82,7 +81,7 @@ public class MyTests {
             }
         }
         programLogic.matrix[5][18] = programInterface.emptyColor;
-        programLogic.clearFullRows();
+        programLogic.clearFullRows(programLogic.matrix, false);
 
         for (int i = 1; i < 11; i++) {
             if (i == 5) {
@@ -96,18 +95,18 @@ public class MyTests {
 
     @org.junit.jupiter.api.Test
     void futurePositionTest() {
-        programLogic.shift = new Point(5, 0);
-        programLogic.currentShape = Shapes.shapes[0];
-        programLogic.currentRotation = 0;
+        programLogic.currentShape.setShift(5, 0);
+        programLogic.currentShape.setShapeCoordinates(Shapes.shapes[0]);
+        programLogic.currentShape.setCurrentRotation(0);
         for (int i = 0; i < 11; i++) {
             programLogic.matrix[i][19] = new Color(71, 156, 48);
         }
 
-        int y = programLogic.futurePosition(programLogic.matrix);
-        for (Point point : programLogic.currentShape[programLogic.currentRotation]) {
-            assertEquals(18, programLogic.shift.y + y + point.y);
+        int y = programLogic.futurePosition(programLogic.matrix, programLogic.currentShape);
+        for (Point point : programLogic.currentShape.getShapeCoordinates()[programLogic.currentShape.getCurrentRotation()]) {
+            assertEquals(18, programLogic.currentShape.getShift().y + y + point.y);
         }
     }
 }
-*/
+
 

@@ -45,22 +45,15 @@ public class MyKeyboardListener implements KeyListener {
         }
 
         if (keyCode == KeyEvent.VK_F) {
-            programLogic.startSolve();
+            programLogic.startSolveFirst();
         }
 
         if (keyCode == KeyEvent.VK_R) {
             programLogic.setUpNewGame();
         }
 
-
-
-        if (keyCode == KeyEvent.VK_B) {
-            programLogic.mySolverSecond = true;
-        }
-
-
         if (keyCode == KeyEvent.VK_M) {
-            programLogic.mySolverMonteCarlo = !programLogic.mySolverMonteCarlo;
+            programLogic.startSolveMonteCarlo();
         }
     }
 

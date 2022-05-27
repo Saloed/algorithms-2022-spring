@@ -5,16 +5,22 @@ public class ProgramInterface {
     JFrame jFrame;
     private final ProgramLogic programLogic;
     private int width = 447;
-    private int height = 794;
+    private int height = 791;
     private int cubeWall = 35;
     public Color wallsColor = Color.DARK_GRAY;
     public Color emptyColor = Color.BLACK;
     public Color[][] matrix;
+    public int iBorder;
+    public int jBorder;
+    public int rotationBorder;
 
 
     public ProgramInterface (ProgramLogic programLogic) throws InterruptedException {
         this.programLogic = programLogic;
         programLogic.setProgramInterface(this);
+        this.iBorder = programLogic.iBorder;
+        this.jBorder = programLogic.jBorder;
+        this.rotationBorder = programLogic.rotationBorder;
         setUp();
     }
 
@@ -26,27 +32,25 @@ public class ProgramInterface {
 
             g2.setColor(Color.BLACK);
             g2.fillRect(0, 0, width, height);
-            for (int i = 0; i < 12; i++) {
-                for (int j = 0; j < 21; j++) {
+            for (int i = 0; i < iBorder; i++) {
+                for (int j = 0; j < jBorder; j++) {
                     g2.setColor(programLogic.matrix[i][j]);
                     g2.fillRect(i * (cubeWall + 1), j * (cubeWall + 1), cubeWall, cubeWall);
                 }
             }
 
             if (!programLogic.getGameOver()) {
-                if (false) {
-                    g2.setColor(new Color(250, 250, 250));
-                    int y = programLogic.getSolve() ? 0 : programLogic.futurePosition(programLogic.matrix, programLogic.currentShape);
-                    for (Point point : programLogic.currentShape.shapeCoordinates[programLogic.currentShape.currentRotation]) {
-                        g2.fillRect((programLogic.currentShape.shift.x + point.x) * (cubeWall + 1),
-                                (point.y + programLogic.currentShape.shift.y + y) * (cubeWall + 1), cubeWall, cubeWall);
-                    }
+                g2.setColor(new Color(250, 250, 250));
+                int y = programLogic.getSolve() ? 0 : programLogic.futurePosition(programLogic.matrix, programLogic.currentShape);
+                for (Point point : programLogic.currentShape.getShapeCoordinates()[programLogic.currentShape.getCurrentRotation()]) {
+                    g2.fillRect((programLogic.currentShape.getShift().x + point.x) * (cubeWall + 1),
+                            (point.y + programLogic.currentShape.getShift().y + y) * (cubeWall + 1), cubeWall, cubeWall);
                 }
 
-                g2.setColor(programLogic.currentShape.currentColor);
-                for (Point point : programLogic.currentShape.shapeCoordinates[programLogic.currentShape.currentRotation]) {
-                    g2.fillRect((programLogic.currentShape.shift.x + point.x) * (cubeWall + 1),
-                            (point.y + programLogic.currentShape.shift.y) * (cubeWall + 1), cubeWall, cubeWall);
+                g2.setColor(programLogic.currentShape.getCurrentColor());
+                for (Point point : programLogic.currentShape.getShapeCoordinates()[programLogic.currentShape.getCurrentRotation()]) {
+                    g2.fillRect((programLogic.currentShape.getShift().x + point.x) * (cubeWall + 1),
+                            (point.y + programLogic.currentShape.getShift().y) * (cubeWall + 1), cubeWall, cubeWall);
                 }
             }
             g2.setColor(Color.WHITE);
