@@ -36,7 +36,7 @@ class PlayerMap(val spawnLocation: Location, isPrimary: Boolean) {
 
 
     fun calcToDiscover() {
-        for (direction in setOf(Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH)) {
+        for (direction in directionSet) {
             val location = direction + currentLocation
             if (location !in toDiscover && knownLocations[location] == null) {
                 toDiscover.add(location)
@@ -45,9 +45,10 @@ class PlayerMap(val spawnLocation: Location, isPrimary: Boolean) {
         }
     }
 
-    // todo(revisit for changes)
+    // todo(revisit for changes + toDiscover)
     fun setLastMoveResults(res: MoveResult, lastMove:Direction) {
         roomToVisualize = (lastMove + currentLocation to res.room)
+        if (lastMove + currentLocation in toDiscover) toDiscover.remove(lastMove + currentLocation)
         if (res.successful) {
             currentLocation = lastMove + currentLocation
             knownLocations[currentLocation] = res.room

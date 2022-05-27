@@ -1,7 +1,6 @@
 package solver
 
 import core.*
-import graphics.ViewModel
 import solver.strategies.*
 
 class HumanAI : AbstractPlayer() {
@@ -10,7 +9,7 @@ class HumanAI : AbstractPlayer() {
     var isFirstMove = true
 
 
-    var currentStrategy: GlobalStrategy? = null
+    var globalStrategy: AbstractGlobalStrategy? = null
 
 
     override fun getNextMove(): Move {
@@ -18,14 +17,14 @@ class HumanAI : AbstractPlayer() {
             playerMap = PlayerMapFactory(startLocation)
             isFirstMove = false
         }
-        return currentStrategy?.nextMove() ?: let {
-            currentStrategy = DomainExpansion(playerMap)
-            currentStrategy!!.nextMove()
+        return globalStrategy?.nextMove() ?: let {
+            globalStrategy = FindAllWormholes(playerMap)
+            globalStrategy!!.nextMove()
         }
     }
 
 
     override fun setMoveResult(result: MoveResult) {
-        playerMap.updateCurrentMap(result)
+        globalStrategy!!.setMoveResults(result)
     }
 }

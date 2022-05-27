@@ -33,9 +33,8 @@ class PlayerMapFactory(val actualStartLocation: Location) {
         currentMap.let {
             ViewModel.updatePlayerMap(
                 index = currentMapIndex,
-                toDiscover = it.discoverCellsToVisualize,
-                current = it.roomToVisualize,
-                relStartLoc = it.spawnLocation
+                toDiscover = it.toDiscover, // TODO()
+                current = it.roomToVisualize
             )
         }
     }
@@ -54,9 +53,9 @@ class PlayerMapFactory(val actualStartLocation: Location) {
                 }
                 is Wormhole -> {
                     wormholesTotal++
-                        //todo(addWormhole)
+                        // todo(addWormhole)
                     addMap()
-                } //TODO("WORMHOLE without id")
+                } // TODO("WORMHOLE without id")
                 else -> {} //do nothing
             }
         }

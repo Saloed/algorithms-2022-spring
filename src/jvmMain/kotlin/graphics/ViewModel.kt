@@ -14,6 +14,8 @@ import kotlin.concurrent.thread
 
 // TODO(Make a game object on press start)
 object ViewModel {
+    lateinit var gameState: GameState
+    val isRunning = mutableStateOf(false)
     var currPos: Location? = null
     var prevPos: Location? = null
     val stateOfCurrPose = mutableStateOf(currPos)
@@ -29,7 +31,6 @@ object ViewModel {
 //    var currentMap: Array<Array<MutableState<String>>>? = null
 
     val mapsTotal = mutableStateOf(0)
-    val isRunning = mutableStateOf(false)
 
 
     fun updatePassedLocation(mapIndex: Int) {
@@ -42,7 +43,6 @@ object ViewModel {
         index: Int,
         toDiscover: Set<Location> = setOf<Location>(),
         current: Pair<Location, Room>,
-        relStartLoc: Location
     ) {
 //        val offset = if (index == 0) Location(1,1) else prevPos!! - relStartLoc + Location(1,1)
 
@@ -53,7 +53,7 @@ object ViewModel {
         } else {
 
         }
-        val offset = if (index == 0) Location(1,1) else allMapsOffsets[index + 1]!!
+        val offset = if (index == 0) Location(1, 1) else allMapsOffsets[index + 1]!!
         allMaps[index + 1][(current.first + offset).y][(current.first + offset).x].value = ch.toString()
 //        println("index =${index + 1} offset=$offset")
 //        println("######")
@@ -97,12 +97,12 @@ object ViewModel {
         for (y in -1..lab.height) {
             for (x in -1..lab.width) {
                 val ch = getCharFromRoom(lab[x, y])
-                if (ch == 'S') updateCurrentLocation(Location(x,y))
+                if (ch == 'S') updateCurrentLocation(Location(x, y))
                 map[y + 1][x + 1].value = ch.toString()
             }
         }
         allMaps.add(map)
-        allMapsOffsets.add(Location(0,0))
+        allMapsOffsets.add(Location(0, 0))
         labHeight = lab.height + 2
         labWidth = lab.width + 2
 //        currentMap = map
@@ -113,7 +113,7 @@ object ViewModel {
     fun addEmptyMap() {
         val map = Array(labHeight) { Array(labWidth) { mutableStateOf("") } }
         allMaps.add(map)
-        allMapsOffsets.add(currPos!! + Location(1,1))
+        allMapsOffsets.add(currPos!! + Location(1, 1))
         mapsTotal.value++
     }
     fun addMapWithDefaults() {
@@ -135,7 +135,6 @@ object ViewModel {
     }
 
 
-
 }
 
 
@@ -151,8 +150,7 @@ abstract class AbstractPlayerRun {
         val actualResult = controller.makeMoves(500)
         if (actualResult.exitReached) {
             println("You won!")
-        }
-        else {
+        } else {
             println("You lose!")
         }
 
@@ -165,4 +163,24 @@ abstract class AbstractPlayerRun {
 
 class BrainDeadRun : AbstractPlayerRun() {
     override fun createPlayer() = BrainDead()
+}
+
+class GameState {
+
+    var currPos: Location? = null
+    var prevPos: Location? = null
+    val stateOfCurrPose = mutableStateOf(currPos)
+    var labHeight = 0
+    var labWidth = 0
+    lateinit var startLoc: Location
+
+//    var lastWormhPos: Location? = null
+//    var currWormhPos: Location? = null
+
+    var allMaps = mutableListOf<Array<Array<MutableState<String>>>>()
+    val allMapsOffsets = mutableListOf<Location?>()
+//    var currentMap: Array<Array<MutableState<String>>>? = null
+
+    val mapsTotal = mutableStateOf(0)
+    val isRunning = mutableStateOf(false)
 }

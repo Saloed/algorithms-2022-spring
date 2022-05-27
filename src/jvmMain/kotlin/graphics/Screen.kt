@@ -43,13 +43,26 @@ fun AppScreen() {
         LazyColumn {
             item {
                 Column {
-                    Button(
-                        enabled = !isMapInited,
-                        onClick = { ViewModel.start() }
-                    ) {
-                        Text(
-                            text = if (isMapInited) "Running..." else "Start"
-                        )
+                    Row {
+                        Button(
+                            enabled = !isMapInited,
+                            onClick = { ViewModel.start() }
+                        ) {
+                            Text(
+                                text = if (isMapInited) "Running..." else "Start"
+                            )
+                        }
+                        Button(
+                            onClick = { framesPerSecond += 1 }
+                        ) {
+                            Text("FPS+")
+                        }
+                        Button(
+                            onClick = { if (framesPerSecond != 1) framesPerSecond -= 1 }
+                        ) {
+                            Text("FPS-")
+                        }
+
                     }
                     if (mapsTotal != 0 && isMapInited) {
                         for (currentMapIndex in ViewModel.allMaps.indices) {

@@ -8,15 +8,17 @@ import solver.plus
 
 class RyoikiTenkai(val currentMap: PlayerMap) : Strategy {
 
+    var nextMoves: ArrayDeque<WalkMove>? = null
+
+
     // returns False when unable to move from location
-    fun analyzeWallOrKnown(location: Location = currentMap.currentLocation): Pair<Boolean, Direction> {
+    private fun analyzeWallOrKnown(location: Location = currentMap.currentLocation): Pair<Boolean, Direction?> {
         var resDirection: Direction? = null
         var maxK = -1
 
         for (direction in directionSet.shuffled()) {
             val moveLocation = direction + location
             if (moveLocation !in currentMap.knownLocations) {
-//                println("for moveDirection: $direction, possibleMoveLocation = $moveLocation, known= ${currentMap.knownLocations[moveLocation] != null}")
                 var currentK = -1
 
                 for (x in -1..1) {
@@ -32,13 +34,7 @@ class RyoikiTenkai(val currentMap: PlayerMap) : Strategy {
                                 is Wormhole -> currentK + 1
                                 null -> currentK
                             }
-
-
                             if (checkedLocation in currentMap.toDiscover) currentK++
-//                            println("   for x=$x, y=$y, k=$currentK")
-//                            println("   room at location=${currentMap.knownLocations[checkedLocation]}")
-//                            println("   in toDiscover=${checkedLocation in currentMap.toDiscover}")
-
                         }
                     }
                 }
@@ -47,14 +43,34 @@ class RyoikiTenkai(val currentMap: PlayerMap) : Strategy {
                 }
             }
         }
-
-        return Pair(maxK == -1, resDirection!!)
+        return Pair(maxK == -1, resDirection)
     }
 
     override fun nextMove(): StrategyMove {
-        val strategyDirection = analyzeWallOrKnown(currentMap.currentLocation).second
+//        lateinit var resDirection: Direction
+        var resMove: WalkMove? = null
 
-        return StrategyMove(WalkMove(strategyDirection), strategyDirection)
+        if (nextMoves != null) resMove = nextMoves!!.removeFirstOrNull()
+        if (resMove == null) {
+            val result = analyzeWallOrKnown(currentMap.currentLocation).second
+            if (result == null) {
+                if (currentMap.toDiscover.isNotEmpty()) {
+                    nextMoves = findClosestOrGoal(currentMap)
+                    resMove = nextMoves!!.removeLast()
+                } else {
+                    if (currentMap.wormholes.isEmpty()) {
+                        nextMoves = findClosestOrGoal(currentMap, currentMap.exit!!)
+                        resMove = nextMoves!!.removeLast()
+                    } else {
+                        nextMoves = findClosestOrGoal(currentMap, currentMap.wormholes.toList().last().first)
+                        resMove = nextMoves!!.removeLast()
+                    }
+                }
+            } else {
+                resMove = WalkMove(result)
+            }
+        }
+        return StrategyMove(resMove, resMove.direction)
     }
 }
 
