@@ -502,7 +502,7 @@ public class ProgramLogic {
                 while (gameProcess) {
                     programInterface.repaint();
 
-                    if (!getGameOver()) {
+                    if (!getGameOver() && !getPause()) {
                         if (getPlay()) {
                             oneTick(matrix, currentShape);
                             Thread.sleep(1000);
