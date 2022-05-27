@@ -7,7 +7,9 @@ class PlayerMapFactory(val actualStartLocation: Location) {
     var playerMaps = mutableListOf<PlayerMap>()
     var currentMapIndex = -1
     val globalWormholes = mutableMapOf<Location, Wormhole>()
+    val WormHoleLocations = mutableMapOf<Location, Location>()
     var wormholesTotal = 0
+
     var treasureFound = false
     val currentMap: PlayerMap get() = playerMaps[currentMapIndex]
 
@@ -55,6 +57,7 @@ class PlayerMapFactory(val actualStartLocation: Location) {
                     wormholesTotal++
                         // todo(addWormhole)
                     addMap()
+
                 } // TODO("WORMHOLE without id")
                 else -> {} //do nothing
             }

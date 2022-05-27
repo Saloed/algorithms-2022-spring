@@ -6,13 +6,11 @@ import solver.directionSet
 import solver.plus
 
 
-class RyoikiTenkai(val currentMap: PlayerMap) : Strategy {
-
-    var nextMoves: ArrayDeque<WalkMove>? = null
+class RyoikiTenkai(val currentMap: PlayerMap) : Strategy() {
 
 
     // returns False when unable to move from location
-    private fun analyzeWallOrKnown(location: Location = currentMap.currentLocation): Pair<Boolean, Direction?> {
+    private fun analyzeWallOrKnown(location: Location = currentMap.currentLocation): WalkMove? {
         var resDirection: Direction? = null
         var maxK = -1
 
@@ -43,35 +41,53 @@ class RyoikiTenkai(val currentMap: PlayerMap) : Strategy {
                 }
             }
         }
-        return Pair(maxK == -1, resDirection)
+        return resDirection?.let { WalkMove(it) }
     }
 
-    override fun nextMove(): StrategyMove {
-//        lateinit var resDirection: Direction
-        var resMove: WalkMove? = null
+    override fun nextMove(): WalkMove? =
+        (nextMoves?.removeLastOrNull()
+            ?: analyzeWallOrKnown())
+            ?: if (currentMap.toDiscover.isNotEmpty()) {
+                nextMoves = findClosestOrGoal(currentMap)
+                nextMoves!!.removeLastOrNull()
+            } else null
 
-        if (nextMoves != null) resMove = nextMoves!!.removeFirstOrNull()
-        if (resMove == null) {
-            val result = analyzeWallOrKnown(currentMap.currentLocation).second
-            if (result == null) {
-                if (currentMap.toDiscover.isNotEmpty()) {
-                    nextMoves = findClosestOrGoal(currentMap)
-                    resMove = nextMoves!!.removeLast()
-                } else {
-                    if (currentMap.wormholes.isEmpty()) {
-                        nextMoves = findClosestOrGoal(currentMap, currentMap.exit!!)
-                        resMove = nextMoves!!.removeLast()
-                    } else {
-                        nextMoves = findClosestOrGoal(currentMap, currentMap.wormholes.toList().last().first)
-                        resMove = nextMoves!!.removeLast()
-                    }
-                }
-            } else {
-                resMove = WalkMove(result)
-            }
-        }
-        return StrategyMove(resMove, resMove.direction)
-    }
+
+//        println("Getting next move from RyoikiTenkai")
+//        var resDirection: Direction? = null
+//        var resMove: Move? = null
+//
+//        if (nextMoves != null) resMove = nextMoves!!.removeLastOrNull()
+//        if (resMove == null) {
+//            val result = analyzeWallOrKnown(currentMap.currentLocation).second
+//            println("   analyzeResult= $result")
+//            if (result == null) {
+//                if (currentMap.toDiscover.isNotEmpty()) {
+//                    nextMoves = findClosestOrGoal(currentMap)
+//                    resMove = nextMoves!!.removeLast()
+//                } else {
+//                    if (currentMap.wormholes.isEmpty()) {
+//                        nextMoves = findClosestOrGoal(currentMap, currentMap.exit!!)
+//                        resMove = nextMoves!!.removeLast()
+//                    } else {
+//                        if (currentMap.wormholes.size == 1 && currentMap.currentLocation in currentMap.wormholes) {
+//                            println("   waitMove!")
+//                            resMove = WaitMove
+//                        } else{
+//                            val wormholes = currentMap.wormholes.toList().first()
+//                            nextMoves = findClosestOrGoal(currentMap, wormholes.first)
+//                            resMove = nextMoves!!.removeLast()
+//                        }
+//                    }
+//                }
+//            } else {
+//                resMove = WalkMove(result)
+//            }
+//        }
+//        if (resMove is WalkMove) resDirection = resMove.direction
+//        println("   resMove= $resMove, $resDirection")
+//        return StrategyMove(resMove, resDirection)
+//    }
 }
 
 

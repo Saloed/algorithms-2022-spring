@@ -58,18 +58,27 @@ fun AppScreen() {
                             Text("FPS+")
                         }
                         Button(
-                            onClick = { if (framesPerSecond != 1) framesPerSecond -= 1 }
+                            onClick = { if (framesPerSecond > 1) framesPerSecond -= 1 else framesPerSecond /= 2.0 }
                         ) {
                             Text("FPS-")
                         }
-
+                        Button(
+                            onClick = { if (framesPerSecond > 10) framesPerSecond -= 10 else framesPerSecond = 1.0 }
+                        ) {
+                            Text("FPS--")
+                        }
+                        Button(
+                            onClick = { framesPerSecond += 10 }
+                        ) {
+                            Text("FPS++")
+                        }
                     }
                     if (mapsTotal != 0 && isMapInited) {
-                        for (currentMapIndex in ViewModel.allMaps.indices) {
+                        for (currentMapIndex in ViewModel.gameState.allMaps.indices) {
                             Text("Labyrinth $currentMapIndex")
-                            for (y in ViewModel.allMaps[currentMapIndex].indices) {
+                            for (y in ViewModel.gameState.allMaps[currentMapIndex].indices) {
                                 Row {
-                                    for (x in ViewModel.allMaps[currentMapIndex][y].indices) {
+                                    for (x in ViewModel.gameState.allMaps[currentMapIndex][y].indices) {
                                         Cell(currentMapIndex, y, x)
                                     }
                                 }
@@ -95,8 +104,8 @@ fun AppScreen() {
 @Composable
 fun Cell(currentMapIndex: Int, y: Int, x: Int) {
 
-    val currPos by remember { ViewModel.stateOfCurrPose }
-    val ch by remember { ViewModel.allMaps[currentMapIndex][y][x] }
+    val currPos by remember { ViewModel.gameState.stateOfCurrPose }
+    val ch by remember { ViewModel.gameState.allMaps[currentMapIndex][y][x] }
     var color = when (ch) {
         "#" -> Colors.WALL
         "T" -> Colors.TREASURE

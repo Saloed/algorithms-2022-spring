@@ -14,73 +14,34 @@ import kotlin.concurrent.thread
 
 // TODO(Make a game object on press start)
 object ViewModel {
-    lateinit var gameState: GameState
+    var gameState = GameState()
     val isRunning = mutableStateOf(false)
-    var currPos: Location? = null
-    var prevPos: Location? = null
-    val stateOfCurrPose = mutableStateOf(currPos)
-    var labHeight = 0
-    var labWidth = 0
-    lateinit var startLoc: Location
-
-//    var lastWormhPos: Location? = null
-//    var currWormhPos: Location? = null
-
-    var allMaps = mutableListOf<Array<Array<MutableState<String>>>>()
-    val allMapsOffsets = mutableListOf<Location?>()
-//    var currentMap: Array<Array<MutableState<String>>>? = null
-
     val mapsTotal = mutableStateOf(0)
-
-
-    fun updatePassedLocation(mapIndex: Int) {
-        if (prevPos != null && allMaps[mapIndex][prevPos!!.y + 1][prevPos!!.x + 1].value == " ") {
-            allMaps[mapIndex][prevPos!!.y + 1][prevPos!!.x + 1].value = "*"
-        }
-    }
 
     fun updatePlayerMap(
         index: Int,
-        toDiscover: Set<Location> = setOf<Location>(),
-        current: Pair<Location, Room>,
+        toDiscover: Set<Location> = setOf(),
+        current: Pair<Location, Room>
     ) {
-//        val offset = if (index == 0) Location(1,1) else prevPos!! - relStartLoc + Location(1,1)
-
-        val ch = getCharFromRoom(current.second)
-        if (index + 1 > allMaps.size - 1) {
-            addEmptyMap()
-//            sleep(1000) // TODO("Remove sleep parameter")
-        } else {
-
+        gameState.apply {
+            val ch = getCharFromRoom(current.second)
+            if (index + 1 > allMaps.size - 1) addEmptyMap()
+            val offset = if (index == 0) Location(1, 1) else allMapsOffsets[index + 1]!!
+            allMaps[index + 1][(current.first + offset).y][(current.first + offset).x].value = ch.toString()
+            toDiscover.forEach {
+                allMaps[index + 1][it.y + offset.y][it.x + offset.x].value = "*"
+            }
         }
-        val offset = if (index == 0) Location(1, 1) else allMapsOffsets[index + 1]!!
-        allMaps[index + 1][(current.first + offset).y][(current.first + offset).x].value = ch.toString()
-//        println("index =${index + 1} offset=$offset")
-//        println("######")
-        toDiscover.forEach {
-            allMaps[index + 1][it.y + offset.y][it.x + offset.x].value = "*"
-        }
-//        println("########")
-
-//        allMaps[index + 1] = when(current.second) {
-//            Empty -> allMaps[index + 1][]
-//            Entrance -> TODO()
-//            Exit -> TODO()
-//            Wall -> TODO()
-//            is WithContent -> TODO()
-//            is Wormhole -> TODO()
-//        }
     }
 
     fun updateCurrentLocation(location: Location) {
-        if (currPos == null) startLoc = location
-        currPos = location
-        stateOfCurrPose.value = location
-        prevPos = currPos
+        gameState.apply {
+            if (currPos == null) startLoc = location
+            currPos = location
+            stateOfCurrPose.value = location
+            prevPos = currPos
+        }
     }
-//    fun updatePlayerMaps(mapIndex: Int, location: Location) {
-//        _currentPlayerMap[mapIndex]
-//    }
 
     fun getCharFromRoom(room: Room) = when (room) {
         is Empty -> ' '
@@ -101,42 +62,40 @@ object ViewModel {
                 map[y + 1][x + 1].value = ch.toString()
             }
         }
-        allMaps.add(map)
-        allMapsOffsets.add(Location(0, 0))
-        labHeight = lab.height + 2
-        labWidth = lab.width + 2
-//        currentMap = map
-        isRunning.value = true
-        mapsTotal.value = 1
-    }
-
-    fun addEmptyMap() {
-        val map = Array(labHeight) { Array(labWidth) { mutableStateOf("") } }
-        allMaps.add(map)
-        allMapsOffsets.add(currPos!! + Location(1, 1))
-        mapsTotal.value++
-    }
-    fun addMapWithDefaults() {
-        TODO("To prevent sleep")
-    }
-
-
-    fun start() {
-        if (!isRunning.value) {
-            thread {
-                val playerRun = object : AbstractPlayerRun() {
-                    override fun createPlayer() = HumanAI()
-                }
-                playerRun.doTestLab(pathToLabyrinth)
-                isRunning.value = false
-
-            }
+        gameState.apply {
+            allMaps.add(map)
+            allMapsOffsets.add(Location(0, 0))
+            labHeight = lab.height + 2
+            labWidth = lab.width + 2
+            isRunning.value = true
+            mapsTotal.value = 1
         }
     }
 
+    fun addEmptyMap() {
+        gameState.apply {
+            val map = Array(labHeight) { Array(labWidth) { mutableStateOf("") } }
+            allMaps.add(map)
+            allMapsOffsets.add(currPos!! + Location(1, 1))
+            mapsTotal.value++
+        }
+    }
 
+    fun start() {
+        gameState = GameState()
+        gameState.apply {
+            if (!isRunning.value) {
+                thread {
+                    val playerRun = object : AbstractPlayerRun() {
+                        override fun createPlayer() = HumanAI()
+                    }
+                    playerRun.doTestLab(pathToLabyrinth)
+                    isRunning.value = false
+                }
+            }
+        }
+    }
 }
-
 
 abstract class AbstractPlayerRun {
 
@@ -153,34 +112,18 @@ abstract class AbstractPlayerRun {
         } else {
             println("You lose!")
         }
-
-//        assertEquals(controller.playerPath.toString(), expectedResult.exitReached, actualResult.exitReached)
-//        if (expectedResult.exitReached && actualResult.exitReached && expectedResult.moves >= 0) {
-//            assertEquals(controller.playerPath.toString(), expectedResult.moves, actualResult.moves)
-//        }
     }
 }
 
-class BrainDeadRun : AbstractPlayerRun() {
-    override fun createPlayer() = BrainDead()
-}
-
 class GameState {
-
     var currPos: Location? = null
     var prevPos: Location? = null
     val stateOfCurrPose = mutableStateOf(currPos)
     var labHeight = 0
     var labWidth = 0
     lateinit var startLoc: Location
-
-//    var lastWormhPos: Location? = null
-//    var currWormhPos: Location? = null
-
     var allMaps = mutableListOf<Array<Array<MutableState<String>>>>()
     val allMapsOffsets = mutableListOf<Location?>()
-//    var currentMap: Array<Array<MutableState<String>>>? = null
 
-    val mapsTotal = mutableStateOf(0)
-    val isRunning = mutableStateOf(false)
+
 }

@@ -3,75 +3,15 @@ package solver.strategies
 import core.*
 import solver.*
 
-/** turn mapFactory updateGraphics off to test */
-//fun main() {
-//    val mapFactory = PlayerMapFactory(Location(5,5))
-////    mapFactory.updateCurrentMap()
-//    val result = MoveResult(Empty, Condition(false), true, "moveAdded")
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.EAST)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.EAST)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.EAST)
-//
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.NORTH)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.NORTH)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.NORTH)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.NORTH)
-//
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.WEST)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.WEST)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.WEST)
-//
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.SOUTH)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.SOUTH)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.SOUTH)
-//
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.EAST)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.EAST)
-//
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.NORTH)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.NORTH)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.WEST)
-//    mapFactory.currentMap.setLastMoveResults(result, Direction.SOUTH)
-//
-//
-//    val map = arrayListOf(
-//        arrayListOf(" ", " ", " ", " ", " ", " ", " ", " ", " ", " "),
-//        arrayListOf(" ", " ", " ", " ", " ", " ", " ", " ", " ", " "),
-//        arrayListOf(" ", " ", " ", " ", " ", " ", " ", " ", " ", " "),
-//        arrayListOf(" ", " ", " ", " ", " ", " ", " ", " ", " ", " "),
-//        arrayListOf(" ", " ", " ", " ", " ", " ", " ", " ", " ", " "),
-//        arrayListOf(" ", " ", " ", " ", " ", " ", " ", " ", " ", " "),
-//        arrayListOf(" ", " ", " ", " ", " ", " ", " ", " ", " ", " "),
-//        arrayListOf(" ", " ", " ", " ", " ", " ", " ", " ", " ", " "),
-//        arrayListOf(" ", " ", " ", " ", " ", " ", " ", " ", " ", " "),
-//        arrayListOf(" ", " ", " ", " ", " ", " ", " ", " ", " ", " "),
-//    )
-//    var counter = 0
-//    mapFactory.currentMap.knownLocations.forEach {
-//        map[it.key.y][it.key.x] = "X"
-//        counter++
-//        println("location = ${it.key}, valur= ${it.value}")
-//    }
-//    mapFactory.currentMap.toDiscover.forEach {
-//        map[it.y][it.x] = "?"
-//    }
-//    mapFactory.currentMap.knownLocations.forEach {
-//        if (it.key == mapFactory.currentMap.currentLocation) map[it.key.y][it.key.x] = "O"
-//    }
-//    map.forEach { println(it) }
-//
-//    val findClos = findClosestOrGoal(mapFactory, Location(8,0))
-//    findClos.forEach {
-//        println(it.direction)
-//    }
-//}
 
-
-fun findClosestOrGoal(currentMap: PlayerMap, goal: Location? = null): ArrayDeque<WalkMove>{
-    val startLocation = currentMap.currentLocation
+fun findClosestOrGoal(
+    currentMap: PlayerMap,
+    goal: Location? = null,
+    start: Location = currentMap.currentLocation
+): ArrayDeque<WalkMove> {
 
     val toExpand = ArrayDeque<Location>()
-    val knownLocations = mutableMapOf(startLocation to 0)
+    val knownLocations = mutableMapOf(start to 0)
     var isRouteFound = false
     lateinit var endLocation: Location
 
@@ -93,7 +33,7 @@ fun findClosestOrGoal(currentMap: PlayerMap, goal: Location? = null): ArrayDeque
             minSteps = minOf((knownLocations[direction + newLocation] ?: Int.MAX_VALUE), minSteps)
         }
         knownLocations[newLocation] = minSteps + 1
-        println("$newLocation ${newLocation in currentMap.toDiscover} ${newLocation in currentMap.toDiscover && goal == null}" )
+        println("$newLocation ${newLocation in currentMap.toDiscover} ${newLocation in currentMap.toDiscover && goal == null}")
         if (newLocation in currentMap.toDiscover && goal == null || newLocation == goal) {
             isRouteFound = true
             endLocation = newLocation
@@ -101,11 +41,12 @@ fun findClosestOrGoal(currentMap: PlayerMap, goal: Location? = null): ArrayDeque
             expandUntilGoal(newLocation)
         }
     }
-    expandUntilGoal(startLocation)
-    println("goal= $endLocation")
-    println("currentLoc= ${currentMap.currentLocation}")
+    expandUntilGoal(start)
+    println("   goal= $endLocation")
+    println("   currentLoc= ${currentMap.currentLocation}")
+    println("   currentLoc= ${start}")
     val route = ArrayDeque<WalkMove>()
-    reconstructFromMap(knownLocations, currentMap.currentLocation, endLocation, route)
+    reconstructFromMap(knownLocations, start, endLocation, route)
     println(route.map { it.direction })
     return route
 

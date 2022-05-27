@@ -2,12 +2,16 @@ package solver.strategies
 
 import core.Direction
 import core.Move
-import solver.PlayerMapFactory
+import core.WalkMove
 
 
-data class StrategyMove(val move: Move, val direction: Direction)
+//data class StrategyMove(val move: WalkMove, val direction: Direction)
 
-interface Strategy {
-    fun nextMove(): StrategyMove
+sealed class Strategy {
+
+    var isWaitMove = false
+    var nextMoves: ArrayDeque<WalkMove>? = null
+
+    abstract fun nextMove(): WalkMove?
 }
 
