@@ -1,10 +1,15 @@
 import kotlin.math.abs
 
-class Board(private val numbers: Array<IntArray>) {
-    private var metric = 0
-    private var zeroCoordinates = Pair(-1, -1) // zero is an empty cell
+class Board private constructor(
+    private val numbers: Array<IntArray>,
+    private var zeroCoordinates: Pair<Int, Int>
+) {
 
-    init {
+    private fun columnsSize() = numbers.size
+    private fun rowSize() = numbers[0].size
+
+    val metric: Int by lazy {
+        var metric = 0
         for (i in numbers.indices)
             for (j in numbers[i].indices) {
                 val needNumber = i * columnsSize() + j + 1
@@ -12,52 +17,23 @@ class Board(private val numbers: Array<IntArray>) {
 //                    metric++
                     metric += abs(numbers[i][j] - needNumber) / columnsSize() + abs(numbers[i][j] - needNumber) % rowSize()
                 }
-                if (numbers[i][j] == 0) zeroCoordinates = Pair(i, j)
             }
+        metric
     }
 
     // for immutability
     fun numbers() = numbers
-    fun metric() = metric
     fun zeroCoordinates() = zeroCoordinates
 
-    private fun columnsSize() = numbers.size
-    private fun rowSize() = numbers[0].size
-
-    fun isNeedPosition() = metric == 0
-
-    private fun turn(thisNumbers: Array<IntArray>, x1: Int, y1: Int, x2: Int, y2: Int): Board? {
-        if (x2 < 0 || x2 > columnsSize() - 1 || y2 < 0 || y2 > columnsSize() - 1) return null
-        thisNumbers[x1][y1] = thisNumbers[x2][y2].also { thisNumbers[x2][y2] = thisNumbers[x1][y1] }
-        return Board(thisNumbers)
+    fun turn(thisNumbers: Array<IntArray>, x: Int, y: Int): Board? {
+        if (x < 0 || x > columnsSize() - 1 || y < 0 || y > columnsSize() - 1) return null
+        thisNumbers[zeroCoordinates.first][zeroCoordinates.second] =
+            thisNumbers[x][y].also { thisNumbers[x][y] = thisNumbers[zeroCoordinates.first][zeroCoordinates.second] }
+        zeroCoordinates = Pair(x, y)
+        return createBoard(thisNumbers)
     }
 
-    fun neighborsWithMove(): Set<Board> {
-        val neigh = mutableSetOf<Board>()
-        turn(
-            numbersCopy(),
-            zeroCoordinates.first, zeroCoordinates.second,
-            zeroCoordinates.first, zeroCoordinates.second + 1
-        )?.let { neigh.add(it) }
-        turn(
-            numbersCopy(),
-            zeroCoordinates.first, zeroCoordinates.second,
-            zeroCoordinates.first, zeroCoordinates.second - 1
-        )?.let { neigh.add(it) }
-        turn(
-            numbersCopy(),
-            zeroCoordinates.first, zeroCoordinates.second,
-            zeroCoordinates.first + 1, zeroCoordinates.second
-        )?.let { neigh.add(it) }
-        turn(
-            numbersCopy(),
-            zeroCoordinates.first, zeroCoordinates.second,
-            zeroCoordinates.first - 1, zeroCoordinates.second
-        )?.let { neigh.add(it) }
-        return neigh
-    }
-
-    fun neighborsWithOutMove(): Set<Pair<Int, Int>> {
+    fun neighbors(): Set<Pair<Int, Int>> {
         val neigh = mutableSetOf<Pair<Int, Int>>()
         if (zeroCoordinates.first - 1 in 0 until columnsSize())
             neigh.add(Pair(zeroCoordinates.first - 1, zeroCoordinates.second))
@@ -80,11 +56,7 @@ class Board(private val numbers: Array<IntArray>) {
         if (board.columnsSize() != columnsSize()) return false
         if (board.rowSize() != rowSize()) return false
 
-//        numbers.contentDeepEquals(board.numbers)
-        for (i in numbers.indices) for (j in numbers[i].indices)
-            if (numbers[i][j] != board.numbers[i][j]) return false
-
-        return true
+        return numbers.contentDeepEquals(board.numbers)
     }
 
     override fun toString(): String {
@@ -101,4 +73,15 @@ class Board(private val numbers: Array<IntArray>) {
     }
 
     override fun hashCode(): Int = numbers.contentDeepHashCode()
+
+    companion object {
+
+        fun createBoard(numbers: Array<IntArray>): Board {
+            var zeroCoordinates = Pair(-1, -1)
+            for (i in numbers.indices) for (j in numbers[i].indices)
+                if (numbers[i][j] == 0) zeroCoordinates = Pair(i, j)
+            return Board(numbers, zeroCoordinates)
+        }
+
+    }
 }
