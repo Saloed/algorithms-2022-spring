@@ -1,9 +1,10 @@
+import Board.Companion.createBoard
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MyTests {
 
-    private val needPosition = Board(
+    private val solvablePosition = createBoard(
         arrayOf(
             intArrayOf(1, 2, 3, 4),
             intArrayOf(5, 6, 7, 8),
@@ -11,7 +12,7 @@ class MyTests {
             intArrayOf(13, 14, 15, 0)
         )
     )
-    private val unsolvablePosition = Board(
+    private val unsolvablePosition = createBoard(
         arrayOf(
             intArrayOf(1, 2, 3, 4),
             intArrayOf(5, 6, 7, 8),
@@ -21,28 +22,29 @@ class MyTests {
     )
 
     @Test
-    fun randomTest() {
-        val inputNumbersList = mutableListOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).shuffled()
-        val inputNumbersArray = Array(4) { IntArray(4) }
+    fun randomTests() {
+        for (iterations in 0..30) {
+            val inputNumbersList = mutableListOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).shuffled()
+            val inputNumbersArray = Array(4) { IntArray(4) }
 
-        for (i in inputNumbersArray.indices) for (j in inputNumbersArray[i].indices)
-            inputNumbersArray[i][j] = inputNumbersList[i * inputNumbersArray.size + j]
+            for (i in inputNumbersArray.indices) for (j in inputNumbersArray[i].indices)
+                inputNumbersArray[i][j] = inputNumbersList[i * inputNumbersArray.size + j]
 
-        val board = Board(inputNumbersArray)
+            val board = createBoard(inputNumbersArray)
 //        println(board)
-        val solver = Solver(board)
-        val (lastState, winMovies) = solver.solve()
+            val solver = Solver(board)
+            val (lastState, winMovies) = solver.solve()
 
-        val resultPosition =
-            when (lastState) {
-                needPosition -> needPosition
-                unsolvablePosition -> unsolvablePosition
-                else -> null
-            }
+            val resultPosition =
+                when (lastState) {
+                    solvablePosition -> solvablePosition
+                    unsolvablePosition -> unsolvablePosition
+                    else -> null
+                }
 
-        assertEquals(resultPosition.toString(), lastState.toString(), "")
-        println("moves: ${winMovies.size}")
-
+            assertEquals(resultPosition.toString(), lastState.toString(), "")
+            println("moves: ${winMovies.size}")
+        }
     }
 
     @Test
@@ -54,11 +56,11 @@ class MyTests {
             intArrayOf(13, 14, 15, 4)
         )
 
-        val board = Board(inputNumbers)
+        val board = createBoard(inputNumbers)
         val solver = Solver(board)
         val (lastState, winMovies) = solver.solve()
 
-        assertEquals(needPosition.toString(), lastState.toString(), "isSolvable")
+        assertEquals(solvablePosition.toString(), lastState.toString(), "isSolvable")
         println("moves: ${winMovies.size}")
     }
 
@@ -71,7 +73,7 @@ class MyTests {
             intArrayOf(8, 10, 12, 14)
         )
 
-        val board = Board(numbersArray)
+        val board = createBoard(numbersArray)
         val solver = Solver(board)
         val (lastState, winMovies) = solver.solve()
 
@@ -88,7 +90,7 @@ class MyTests {
             intArrayOf(1, 7, 14, 11)
         )
 
-        val board = Board(numbersArray)
+        val board = createBoard(numbersArray)
         val solver = Solver(board)
         val (lastState, winMovies) = solver.solve()
 
@@ -105,7 +107,7 @@ class MyTests {
             intArrayOf(15, 1, 3, 6)
         )
 
-        val board = Board(numbersArray)
+        val board = createBoard(numbersArray)
         val solver = Solver(board)
         val (lastState, winMovies) = solver.solve()
 
