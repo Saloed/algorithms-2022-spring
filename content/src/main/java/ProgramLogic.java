@@ -27,8 +27,8 @@ public class ProgramLogic {
     private boolean mySolverFirst = false;
     public double[] score;
     public int[] numberOfSuccess;
-    public int numberOfGeneratedShapes = 20;
-    public int numberOfTries = 500;
+    public int numberOfGeneratedShapes = 10;
+    public int numberOfTries = 1000;
     public int amountOfShapes = numberOfGeneratedShapes;
 
     public boolean getMySolverFirst() {
@@ -257,10 +257,9 @@ public class ProgramLogic {
                 } else break;
 
                 if (i == numberOfGeneratedShapes - 1) {
-                    double currScore = checkScore(matrixHelp);
-                    score[index] += currScore;
                     numberOfSuccess[index]++;
                 }
+                score[index] += checkScore(matrixHelp);
 
                 clearFullRows(matrixHelp, false);
             }
@@ -463,7 +462,6 @@ public class ProgramLogic {
             matrix[point.x + currentShape.getShift().x][point.y + currentShape.getShift().y] = currentShape.getCurrentColor();
         }
 
-        setChecked(false);
         this.currentShape = newShape(allShapes);
 
         if (isGameOver(matrix, this.currentShape)) {
@@ -471,6 +469,7 @@ public class ProgramLogic {
         } else {
             clearFullRows(matrix, true);
         }
+        setChecked(false);
     }
 
     public void setUpNewGame() {
